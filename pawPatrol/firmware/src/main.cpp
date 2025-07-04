@@ -2,8 +2,10 @@
 #include "secrets.h"
 #include "potentiometer.h"
 #include "logger.h"
+#include <hallsensor.h>
 
 Potentiometer pot(33); // GPIO pin for the potentiometer
+HallSensor hallSensor(32); // GPIO pin for the hall sensor
 #define LED 2
 
 void setup() {
@@ -32,8 +34,15 @@ void setup() {
 }
 
 void loop() {
-  float voltage = pot.readVoltage();
-  String data = "Potentiometer Voltage: " + String(voltage, 2) + " V";
-  Logger::send(data);
+  //float potvoltage = pot.readVoltage();
+  //String data = "Potentiometer Voltage: " + String(voltage, 2) + " V";
+  //Logger::send(data);
+
+  float hallVoltage = hallSensor.readVoltage();
+  bool magnetDetected = hallSensor.magnetDetected();
+  String hallData = "Hall Sensor Voltage: " + String(hallVoltage, 2) + " V, Magnet Detected: " + (magnetDetected ? "Yes" : "No");
+  Logger::send(hallData);
+
+  Serial.println(hallData);
   delay(100);
 }

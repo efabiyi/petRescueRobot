@@ -1,23 +1,23 @@
 #include <Arduino.h>
-#include "hall.h"
+#include "hallsensor.h"
 
-const int diffPin = 13;
-
-
-void setup() {
-  Serial.begin(115200);
+HallSensor::HallSensor(uint8_t hallPin) {
+  pin = hallPin;
+  pinMode(pin, INPUT);
+  analogReadResolution(12);  // Set ADC resolution to 12 bits
 }
 
-void loop() {
 
-  int sensorValue = analogRead(diffPin);
-  int fudgeFactor = 4095 - sensorValue;
+float HallSensor::readVoltage() {
+  int sensorValue = analogRead(pin);
+  float voltage = sensorValue*( 2.5/ 4095.0); // Convert ADC value to voltage
+  return voltage;
+}
 
-  float voltage = fudgeFactor * (3.3 / 4095.0); // Convert ADC value to voltage
-
-
-  Serial.print("Differential ADC Value: ");
-  Serial.println(voltage);
-  delay(50); // Delay for readability
-
+bool HallSensor::magnetDetected() {
+  float voltage = readVoltage();
+  if (voltage < 2.1) { // Adjust threshold as needed
+    return true; // Magnet detected
+  }
+  return false; // No magnet detected
 }
