@@ -10,7 +10,7 @@ HallSensor::HallSensor(uint8_t hallPin) {
 
 float HallSensor::readVoltage() {
   int sensorValue = analogRead(pin);
-  float voltage = sensorValue*( 2.5/ 4095.0); // Convert ADC value to voltage
+  float voltage = sensorValue*( 4.5/ 4095.0); // Convert ADC value to voltage
   return voltage;
 }
 
