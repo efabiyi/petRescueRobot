@@ -1,6 +1,6 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
-#include "Logger.h"
+#include "logger.h"
 #include "secrets.h"
 
 void Logger::send(const String& message) {

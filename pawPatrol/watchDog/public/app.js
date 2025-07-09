@@ -1,5 +1,5 @@
 async function fetchLogs() {
-  const logDisplay = document.getElementById('logDisplay');
+  const logDisplay = document.getElementById('hallLogs');
   const logs = [];
 
   const eventSource = new EventSource('/stream');

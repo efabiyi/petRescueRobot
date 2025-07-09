@@ -1,6 +1,72 @@
+/* style.css */
 body {
-  font-family: monospace;
-  background: #111;
-  color: #ffffff;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #0d1b2a;
+  color: #e0f7fa;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+header {
+  background-color: #1b263b;
+  padding: 1em 2em;
+  text-align: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+header h1 {
+  margin: 0;
+  font-size: 2.5em;
+  color: #f4d35e;
+}
+
+header p {
+  margin: 0.5em 0 0;
+  font-style: italic;
+  color: #a9d6e5;
+}
+
+.sensor-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5em;
   padding: 2em;
+  flex-grow: 1;
+}
+
+.sensor-card {
+  background-color: #1e3a5f;
+  padding: 1.5em;
+  border-radius: 1em;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.sensor-card h2 {
+  color: #f4d35e;
+  margin-top: 0;
+}
+
+.log-box {
+  background-color: #0f1c2e;
+  color: #00ff99;
+  padding: 1em;
+  border-radius: 0.5em;
+  height: 300px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  font-family: monospace;
+  font-size: 0.95em;
+  border: 1px solid #a9d6e5;
+}
+
+footer {
+  background-color: #1b263b;
+  text-align: center;
+  padding: 1em;
+  color: #a9d6e5;
+  font-size: 0.9em;
+  box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
 }

@@ -2,12 +2,36 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>ESP32 Dashboard</title>
+  <title>👁️ WatchDog </title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>📊 ESP32 Dashboard</h1>
-  <pre id="logDisplay">Waiting for logs...</pre>
+  <header>
+    <h1>👁️ WatchDog 🐶</h1>
+    <p>Keeping a close eye on your sensors.</p>
+  </header>
+
+  <main class="sensor-grid">
+    <section class="sensor-card">
+      <h2>🐾 Hall Effect Sensor</h2>
+      <pre id="hallLogs" class="log-box">Waiting for logs...</pre>
+    </section>
+
+    <section class="sensor-card">
+      <h2>🕶️ Reflectance Sensor</h2>
+      <pre id="reflectanceLogs" class="log-box">Coming soon...</pre>
+    </section>
+
+    <section class="sensor-card">
+      <h2>💡 LIDAR Sensor</h2>
+      <pre id="lidarLogs" class="log-box">Coming soon...</pre>
+    </section>
+  </main>
+
+  <footer>
+    <p>🐶 Team 3! &copy; 2025</p>
+  </footer>
+
   <script src="app.js"></script>
 </body>
 </html>

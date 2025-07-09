@@ -10,13 +10,12 @@ HallSensor::HallSensor(uint8_t hallPin) {
 
 float HallSensor::readVoltage() {
   int sensorValue = analogRead(pin);
-  float voltage = sensorValue*( 4.5/ 4095.0); // Convert ADC value to voltage
+  float voltage = sensorValue*(4.5/ 4095.0); // Convert ADC value to voltage
   return voltage;
 }
 
-bool HallSensor::magnetDetected() {
-  float voltage = readVoltage();
-  if (voltage < 2.1) { // Adjust threshold as needed
+bool HallSensor::detectMagnet( float voltage) {
+  if (voltage > 2.1) { // Adjust threshold as needed
     return true; // Magnet detected
   }
   return false; // No magnet detected
