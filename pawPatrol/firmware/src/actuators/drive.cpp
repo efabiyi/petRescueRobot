@@ -4,16 +4,15 @@
 #include "logger.h"
 
 // Constants
-const int BASE_SPEED = 1200;
+const int BASE_SPEED = 1000;
 const int MIN_SPEED = 0;
 const int MAX_SPEED = 1600;
-const int THRESHOLD = 50;
+const int THRESHOLD = 130;
 const float KP = 0.8f;
 const float KD = 0.0f;
 
 // Pin definitions
 const int LEFT_SENSOR = 36;
-const int MIDDLE_SENSOR = 35;
 const int RIGHT_SENSOR = 34;
 const int FWD_LEFT_PWM = 14;
 const int BWD_LEFT_PWM = 4;
@@ -25,23 +24,24 @@ const int FWD_RIGHT_CHAN = 2;
 const int BWD_RIGHT_CHAN = 3;
 
 // Global variables
-float last_error = 0.0;
-unsigned long last_time = 0;
-float last_correction = 0.0;
+float lastError = 0.0;
+unsigned long lastTime = 0;
+float lastCorrection = 0.0;
+bool offLine = false;
 
-const int OFF_LINE_THRESHOLD = 100;
-int off_line_counter = OFF_LINE_THRESHOLD;
+const int OFF_LINE_THRESHOLD = 700;
+int offLineCounter = OFF_LINE_THRESHOLD;
 
-void debug_print(const String &message) {
+void debugPrint(const String &message) {
   // Serial.print(message);     // Comment out to improve performance
 }
 
-void debug_println(const String &message) {
-  debug_print(message);
+void debugPrintln(const String &message) {
+  debugPrint(message);
   Serial.println();
 }
 
-void initialize_drive() {
+void initializeDrive() {
   ledcSetup(FWD_LEFT_CHAN, 250, 12);
   ledcSetup(BWD_LEFT_CHAN, 250, 12);
   ledcSetup(FWD_RIGHT_CHAN, 250, 12);
@@ -53,133 +53,119 @@ void initialize_drive() {
   ledcAttachPin(BWD_RIGHT_PWM, BWD_RIGHT_CHAN);
 
   pinMode(LEFT_SENSOR, INPUT);
-  pinMode(MIDDLE_SENSOR, INPUT);
   pinMode(RIGHT_SENSOR, INPUT);
 
-  last_time = millis();
+  lastTime = millis();
 }
 
-void left_drive_forward(int speed) {
+void leftDriveForward(int speed) {
   speed = constrain(speed, MIN_SPEED, MAX_SPEED);
   ledcWrite(BWD_LEFT_CHAN, 0);
   ledcWrite(FWD_LEFT_CHAN, speed);
 } 
 
-void left_drive_backward(int speed) {
+void leftDriveBackward(int speed) {
   speed = constrain(speed, MIN_SPEED, MAX_SPEED);
   ledcWrite(FWD_LEFT_CHAN, 0);
   ledcWrite(BWD_LEFT_CHAN, speed);  
 }
 
-void right_drive_forward(int speed) {
+void rightDriveForward(int speed) {
   speed = constrain(speed, MIN_SPEED, MAX_SPEED);
   ledcWrite(BWD_RIGHT_CHAN, 0);
   ledcWrite(FWD_RIGHT_CHAN, speed);
 }
 
-void right_drive_backward(int speed) {
+void rightDriveBackward(int speed) {
   speed = constrain(speed, MIN_SPEED, MAX_SPEED);
   ledcWrite(FWD_RIGHT_CHAN, 0);
   ledcWrite(BWD_RIGHT_CHAN, speed);  
 }
 
-float calculate_error(int l, int r) {
+float calculateError(int l, int r) {
   return (l * -1.0 + r * 1.0) / (l + r + 0.001);
 }
 
-bool is_off_line(int l, int m, int r) {
-  return (l < THRESHOLD && m < THRESHOLD && r < THRESHOLD);
+bool isOffLine(int l, int r) {
+  return (l < THRESHOLD && r < THRESHOLD);
 }
 
 void drive() {
   unsigned long now = millis();
-  float delta_time = (now - last_time) / 1000.0;
-  last_time = now;
+  float deltaTime = (now - lastTime) / 1000.0;
+  lastTime = now;
 
-  int left_reading = analogRead(LEFT_SENSOR);
-  int middle_reading = analogRead(MIDDLE_SENSOR);
-  int right_reading = analogRead(RIGHT_SENSOR);
-  debug_print("Left: ");
-  debug_print(String(left_reading));
-  debug_print(" - Middle: ");
-  debug_print(String(middle_reading));
-  debug_print(" - Right: ");
-  debug_print(String(right_reading));
-  bool off_line = is_off_line(left_reading, middle_reading, right_reading);
+  int leftReading = analogRead(LEFT_SENSOR);
+  int rightReading = analogRead(RIGHT_SENSOR);
+  debugPrint("Left: ");
+  debugPrint(String(leftReading));
+  debugPrint(" - Right: ");
+  debugPrint(String(rightReading));
+  bool offLine = isOffLine(leftReading, rightReading);
+  String pidData = "";
 
-
-  float error;
-  float derivative;
-  float correction;
-  int left_speed;
-  int right_speed;
-
-  if (off_line) {
-    if (last_correction > 0) {
-      left_speed = BASE_SPEED + 1.5 * last_correction;
-      right_speed = BASE_SPEED + 1.5 * last_correction;
-      left_drive_backward(left_speed);
-      right_drive_forward(right_speed);
+  if (offLine) {
+    debugPrint(" - OFF LINE");
+    int speed = BASE_SPEED * 1.2;
+    if (lastCorrection > 0) {
+      leftDriveBackward(speed);
+      rightDriveForward(speed);
+      debugPrint(" - L BACKWARD: ");
+      debugPrint(String(speed));
+      debugPrint(" - R FORWARD: ");
+      debugPrintln(String(speed));
+      pidData = "PID Data: Last Correction: " + String(lastCorrection) + ", Left Backward: " + String(speed) + ", Right Forward: " + String(speed);
     } else {
-      left_speed = BASE_SPEED + 1.5 * last_correction;
-      right_speed = BASE_SPEED + 1.5 * last_correction;
-      left_drive_forward(left_speed);
-      right_drive_backward(right_speed);
+      leftDriveForward(speed);
+      rightDriveBackward(speed);
+      debugPrint(" - L FORWARD: ");
+      debugPrint(String(speed));
+      debugPrint(" - R BACKWARD: ");
+      debugPrintln(String(speed));
+      pidData = "PID Data: Last Correction: " + String(lastCorrection) + ", Left Forward: " + String(speed) + ", Right Backward: " + String(speed);
     }
-
-    // off_line_counter++;
-    // left_drive_forward(0);
-    // right_drive_forward(0);
-    // return;
   } else { // If on line, calculate error and correction
-    // if (off_line_counter > 0) {
-    //   left_drive_forward(0);
-    //   right_drive_forward(0);
-    //   off_line_counter = 0;
-    //   delay(200);
-    // }
-    error = calculate_error(left_reading, middle_reading, right_reading);
-    derivative = (error - last_error) / delta_time;
-    correction = (KP * error) + (KD * derivative);
+    float error = calculateError(leftReading, rightReading);
+    float derivative = (error - lastError) / deltaTime;
+    float correction = (KP * error) + (KD * derivative);
 
-    left_speed = BASE_SPEED - (correction * BASE_SPEED/2);
-    right_speed = BASE_SPEED + (correction * BASE_SPEED/2);
+    int leftSpeed = BASE_SPEED - (correction * BASE_SPEED/2);
+    int rightSpeed = BASE_SPEED + (correction * BASE_SPEED/2);
   
-    left_drive_forward(left_speed);
-    right_drive_forward(right_speed);
+    leftDriveForward(leftSpeed);
+    rightDriveForward(rightSpeed);
     
-    last_error = error;
-    last_correction = correction;
+    lastError = error;
+    lastCorrection = correction;
+
+    debugPrint(" - ON LINE");
+    debugPrint(" - Error: ");
+    debugPrint(String(error));
+    debugPrint(" - Derivative: ");
+    debugPrint(String(derivative));
+
+    debugPrint(" - Correction: ");
+    debugPrint(String(correction));
+    debugPrint(" - L speed: ");
+    debugPrint(String(constrain(leftSpeed, MIN_SPEED, MAX_SPEED)));
+    debugPrint(" - R speed: ");
+    debugPrintln(String(constrain(rightSpeed, MIN_SPEED, MAX_SPEED)));
+    pidData = "PID Data: Error: " + String(error) + ", Derivative: " + String(derivative) + ", Correction: " + String(correction) + ", Left Speed: " + String(leftSpeed) + ", Right Speed: " + String(rightSpeed);
   }
-
-  debug_print(" - Error: ");
-  debug_print(String(error));
-  debug_print(" - Derivative: ");
-  debug_print(String(derivative));
-
-  debug_print(" - Correction: ");
-  debug_print(String(correction));
-
-  debug_print(" - L wheel: ");
-  debug_print(String(constrain(left_speed, MIN_SPEED, MAX_SPEED)));
-  debug_print(" - R wheel: ");
-  debug_println(String(constrain(right_speed, MIN_SPEED, MAX_SPEED)));
-  
-  String driveData = "Reflectance Data: Left:" + String(left_reading) + " - Right: " + String(right_reading) + " - Off Line: " + (off_line ? "Yes" : "No");
-  String pidData = "PID Data: Error: " + String(error) + ", Derivative: " + String(derivative) + ", Correction: " + String(correction) + ", Left Speed: " + String(left_speed) + ", Right Speed: " + String(right_speed);
-  Logger::send(driveData + " | " + pidData);
+  String driveData = "Reflectance Data: Left:" + String(leftReading) + " - Right: " + String(rightReading) + " - Off Line: " + (offLine ? "Yes" : "No");
+  debugPrint(driveData + " | " + pidData);
 
   delay(10);
 }
 
-void test_drive(int left_speed, int right_speed) {
-  left_drive_forward(left_speed);
-  right_drive_forward(right_speed);
+void testDrive(int leftSpeed, int rightSpeed) {
+  leftDriveForward(leftSpeed);
+  rightDriveForward(rightSpeed);
   delay(10);
 }
 
-void test_drive_bwd(int left_speed, int right_speed) {
-  left_drive_backward(left_speed);
-  right_drive_backward(right_speed);
+void testDriveBwd(int leftSpeed, int rightSpeed) {
+  leftDriveBackward(leftSpeed);
+  rightDriveBackward(rightSpeed);
   delay(10);
 }
