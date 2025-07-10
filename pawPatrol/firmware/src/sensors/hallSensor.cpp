@@ -20,3 +20,7 @@ bool HallSensor::detectMagnet( float voltage) {
   }
   return false; // No magnet detected
 }
+
+void HallSensor::sense() {
+  // Serial.print(message);     // Comment out to improve performance
+}

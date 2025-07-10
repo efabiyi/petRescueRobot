@@ -8,4 +8,5 @@ class HallSensor {
     HallSensor(uint8_t hallPin);
     float readVoltage();  // reads the voltage from the hall sensor
     bool detectMagnet(float voltage);  // returns true if magnet is detected
+    void sense();
 };

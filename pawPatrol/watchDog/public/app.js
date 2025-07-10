@@ -1,19 +1,20 @@
 async function fetchLogs() {
-  const logDisplay = document.getElementById('hallLogs');
+  const logDisplay = document.getElementById('reflectanceLogs');
   const logs = [];
 
   const eventSource = new EventSource('/stream');
 
   eventSource.onmessage = (event) => {
-   logs.push(event.data);
+    const formatted = event.data.replace(/\s*\|\s*/g, '\n')
+    logs.push(formatted);
 
-  if (logs.length > 25) {
+    if (logs.length > 25) {
       logs.shift(); // Keep only the last 1000 logs
     }
 
-  logDisplay.textContent = logs.join('\n');
-  logDisplay.scrollTop = logDisplay.scrollHeight; // Auto-scroll to bottom
-  
+    logDisplay.textContent = logs.join('\n\n');
+    logDisplay.scrollTop = logDisplay.scrollHeight; // Auto-scroll to bottom
+
   };
 
   eventSource.onerror = (err) => {
