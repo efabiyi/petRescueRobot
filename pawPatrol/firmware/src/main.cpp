@@ -20,12 +20,8 @@ void loop() {
 
   drive();
 
-  float hallVoltage = hallSensor.readVoltage();
+  /*float hallVoltage = hallSensor.readVoltage();
   bool magnetDetected = hallSensor.detectMagnet(hallVoltage);
   String hallData = "Hall Sensor Voltage: " + String(hallVoltage, 2) + " V, Magnet Detected: " + (magnetDetected ? "Yes" : "No");
-  Logger::send(hallData);
-
-  
-  Serial.println(hallData);
-  delay(100);
+  Logger::send(hallData);*/
 }

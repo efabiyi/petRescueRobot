@@ -1,14 +1,15 @@
 #include <Arduino.h>
 #include "driver/ledc.h"
 #include "drive.h"
+#include "logger.h"
 
 // Constants
 const int BASE_SPEED = 1200;
 const int MIN_SPEED = 0;
 const int MAX_SPEED = 1600;
 const int THRESHOLD = 50;
-const float KP = 15.0f;
-const float KD = 0.5f;
+const float KP = 0.8f;
+const float KD = 0.0f;
 
 // Pin definitions
 const int LEFT_SENSOR = 36;
@@ -82,24 +83,8 @@ void right_drive_backward(int speed) {
   ledcWrite(BWD_RIGHT_CHAN, speed);  
 }
 
-void left_drive(int speed) {
-  if (speed >= 0) {
-    left_drive_forward(speed);
-  } else {
-    left_drive_backward(-1 * speed);
-  }
-}
-
-void right_drive(int speed) {
-  if (speed >= 0) {
-    right_drive_forward(speed);
-  } else {
-    right_drive_backward(-1 * speed);
-  }
-}
-
-float calculate_error(int l, int m, int r) {
-  return (l * -1.0 + r * 1.0) / (l + m + r + 0.001);
+float calculate_error(int l, int r) {
+  return (l * -1.0 + r * 1.0) / (l + r + 0.001);
 }
 
 bool is_off_line(int l, int m, int r) {
@@ -121,6 +106,7 @@ void drive() {
   debug_print(" - Right: ");
   debug_print(String(right_reading));
   bool off_line = is_off_line(left_reading, middle_reading, right_reading);
+
 
   float error;
   float derivative;
@@ -178,6 +164,11 @@ void drive() {
   debug_print(String(constrain(left_speed, MIN_SPEED, MAX_SPEED)));
   debug_print(" - R wheel: ");
   debug_println(String(constrain(right_speed, MIN_SPEED, MAX_SPEED)));
+  
+  String driveData = "Reflectance Data: Left:" + String(left_reading) + " - Right: " + String(right_reading) + " - Off Line: " + (off_line ? "Yes" : "No");
+  String pidData = "PID Data: Error: " + String(error) + ", Derivative: " + String(derivative) + ", Correction: " + String(correction) + ", Left Speed: " + String(left_speed) + ", Right Speed: " + String(right_speed);
+  Logger::send(driveData + " | " + pidData);
+
   delay(10);
 }
 

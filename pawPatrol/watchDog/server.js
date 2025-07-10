@@ -25,9 +25,21 @@ try {
 app.use(bodyParser.text());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// rate limiting middleware
+let lastSentTime = 0;
+const RATE_LIMIT_MS = 500; 
+
 // POST endpoint for ESP32 to send logs
 app.post('/log', (req, res) => {
-  const logEntry = `${new Date().toISOString()} - ${req.body}`;
+  const logEntry = `${req.body}`;
+
+  // Rate limiting: only allow one log every RATE_LIMIT_MS milliseconds
+  const now = Date.now();
+  if (now - lastSentTime < RATE_LIMIT_MS) {
+    return res.sendStatus(429); // Too Many Requests
+  }
+
+  lastSentTime = now;
 
   // Update in-memory logs
   logs.push(logEntry);
