@@ -6,6 +6,9 @@
 #include "drive.h"
 #include "detect.h"
 
+unsigned long lastLogTimeHall = 0;
+unsigned long lastLogTimeDrive = 0;
+const unsigned long hallLogInterval = 1000; //
 
 HallSensor hallSensor(32); // GPIO pin for the hall sensor
 WifiManager wifiMgr;
@@ -13,15 +16,20 @@ WifiManager wifiMgr;
 void setup() {
   Serial.begin(115200);
   wifiMgr.startWifi();
-  initialize_drive();
+  initializeDrive();
 }
 
 void loop() {
+  String driveData = drive();
+  String hallData = hallSensor.sense();
 
-  drive();
+  //logging
+  unsigned long currentTime = millis();
+  if (currentTime - lastLogTimeHall>= hallLogInterval) {
+    lastLogTimeHall = currentTime;
+    Logger::send(driveData + "\n" + hallData);
+  }
 
-  /*float hallVoltage = hallSensor.readVoltage();
-  bool magnetDetected = hallSensor.detectMagnet(hallVoltage);
-  String hallData = "Hall Sensor Voltage: " + String(hallVoltage, 2) + " V, Magnet Detected: " + (magnetDetected ? "Yes" : "No");
-  Logger::send(hallData);*/
 }
+
+

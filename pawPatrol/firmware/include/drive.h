@@ -28,7 +28,7 @@ void leftDriveBackward(int speed);
 void rightDriveForward(int speed);
 void rightDriveBackward(int speed);
 float calculateError();
-void drive();
+String drive();
 void testDrive(int leftSpeed, int rightSpeed);
 void testDriveBwd(int leftSpeed, int rightSpeed);
 

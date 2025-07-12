@@ -1,27 +1,34 @@
 async function fetchLogs() {
-  const logDisplay = document.getElementById('reflectanceLogs');
-  const logs = [];
+  const logDisplays = {
+    drive: document.getElementById('driveLogs'),
+    hall: document.getElementById('hallLogs'),
+  };
+
+  const logs = {
+    drive: [],
+    hall: [],
+  };
 
   const eventSource = new EventSource('/stream');
 
   eventSource.onmessage = (event) => {
-    const formatted = event.data.replace(/\s*\|\s*/g, '\n')
-    logs.push(formatted);
+    const match = event.data.match(/^\[(.*?)\]\s*(.*)$/);
+    if (!match) return;
 
-    if (logs.length > 25) {
-      logs.shift(); // Keep only the last 1000 logs
+    const sensor = match[1].toLowerCase();
+    const message = match[2].replace(/\s*\|\s*/g, '\n');
+
+    if (logDisplays[sensor]) {
+      logs[sensor].push(message);
+      if (logs[sensor].length > 25) logs[sensor].shift();
+      logDisplays[sensor].textContent = logs[sensor].join('\n\n');
+      logDisplays[sensor].scrollTop = logDisplays[sensor].scrollHeight;
     }
-
-    logDisplay.textContent = logs.join('\n\n');
-    logDisplay.scrollTop = logDisplay.scrollHeight; // Auto-scroll to bottom
-
   };
 
   eventSource.onerror = (err) => {
     console.error("❌ Stream error:", err);
   };
-
 }
 
-setInterval(fetchLogs, 500);
 fetchLogs();

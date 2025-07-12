@@ -25,15 +25,14 @@ try {
 app.use(bodyParser.text());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// rate limiting middleware
+// Rate limiting middleware
 let lastSentTime = 0;
-const RATE_LIMIT_MS = 500; 
+const RATE_LIMIT_MS = 500;
 
 // POST endpoint for ESP32 to send logs
 app.post('/log', (req, res) => {
-  const logEntry = `${req.body}`;
+  const logEntry = `${req.body}`.trim();
 
-  // Rate limiting: only allow one log every RATE_LIMIT_MS milliseconds
   const now = Date.now();
   if (now - lastSentTime < RATE_LIMIT_MS) {
     return res.sendStatus(429); // Too Many Requests
@@ -41,47 +40,52 @@ app.post('/log', (req, res) => {
 
   lastSentTime = now;
 
-  // Update in-memory logs
-  logs.push(logEntry);
-  if (logs.length > 100) logs.shift();
+  // 🔧 Split multiple logs if block-delivered
+  const entries = logEntry.split('\n').map(line => line.trim()).filter(Boolean);
 
-  // Write full logs array to file
+  for (const entry of entries) {
+    logs.push(entry);
+    if (logs.length > 100) logs.shift();
+
+    // 🔧 Send each line as a separate SSE event
+    for (const client of clients) {
+      client.write(`data: ${entry}\n\n`);
+    }
+
+    console.log("📥", entry);
+  }
+
+  // Update the log file
   fs.writeFile(LOG_FILE, logs.join('\n') + '\n', err => {
     if (err) {
       console.error('Failed to write logs:', err);
     }
   });
 
-  // Stream to connected clients (SSE)
-  clients.forEach(client => client.write(`data: ${logEntry}\n\n`));
-
-  console.log("📥", logEntry);
   res.sendStatus(200);
 });
 
-// SSE endpoint for dashboard clients
+// SSE endpoint
 app.get('/stream', (req, res) => {
-  // Set SSE headers
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
   res.flushHeaders();
 
-  // Send existing logs right away (optional)
-  logs.forEach(log => res.write(`data: ${log}\n\n`));
+  // 🔧 Send stored logs individually
+  for (const log of logs) {
+    res.write(`data: ${log}\n\n`);
+  }
 
-  // Add client to list
   clients.push(res);
   console.log("🧑‍💻 Client connected, total:", clients.length);
 
-  // Remove client on disconnect
   req.on('close', () => {
     clients = clients.filter(c => c !== res);
     console.log("❌ Client disconnected, total:", clients.length);
   });
 });
 
-// Start server
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ Server running at http://0.0.0.0:${PORT}`);
 });

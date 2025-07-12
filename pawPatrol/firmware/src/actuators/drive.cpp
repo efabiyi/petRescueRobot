@@ -90,7 +90,7 @@ bool isOffLine(int l, int r) {
   return (l < THRESHOLD && r < THRESHOLD);
 }
 
-void drive() {
+String drive() {
   unsigned long now = millis();
   float deltaTime = (now - lastTime) / 1000.0;
   lastTime = now;
@@ -152,10 +152,10 @@ void drive() {
     debugPrintln(String(constrain(rightSpeed, MIN_SPEED, MAX_SPEED)));
     pidData = "PID Data: Error: " + String(error) + ", Derivative: " + String(derivative) + ", Correction: " + String(correction) + ", Left Speed: " + String(leftSpeed) + ", Right Speed: " + String(rightSpeed);
   }
-  String driveData = "Reflectance Data: Left:" + String(leftReading) + " - Right: " + String(rightReading) + " - Off Line: " + (offLine ? "Yes" : "No");
-  debugPrint(driveData + " | " + pidData);
-
+  String driveData = "[drive] Reflectance Data: Left:" + String(leftReading) + " - Right: " + String(rightReading) + " - Off Line: " + (offLine ? "Yes" : "No");
   delay(10);
+
+  return driveData + " | " + pidData;
 }
 
 void testDrive(int leftSpeed, int rightSpeed) {
