@@ -2,11 +2,13 @@ async function fetchLogs() {
   const logDisplays = {
     drive: document.getElementById('driveLogs'),
     hall: document.getElementById('hallLogs'),
+    laser: document.getElementById('laserLogs'),
   };
 
   const logs = {
     drive: [],
     hall: [],
+    laser: [],
   };
 
   const eventSource = new EventSource('/stream');
