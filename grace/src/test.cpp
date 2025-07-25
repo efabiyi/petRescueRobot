@@ -4,6 +4,7 @@
 // #include <array>
 // #include <algorithm>
 // #include <cmath>
+// #include <Arduino.h>
 
 // #define PI 3.14159265358979323846
 
@@ -131,39 +132,54 @@
 //   }
 // }
 
+
+// #include <iostream>
+
+// long _map(long x, long in_min, long in_max, long out_min, long out_max) {
+//     return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min; 
+// } 
+  
+// int GET_DUTY_MG996R(int angle_val) {
+//   return ( (int)_map( 
+//       _map( (angle_val) , 0, 180, 500, 2500), 
+//       0, (1000000L / 50), 0, ((1 << 12) - 1) 
+//     ) 
+//   );
+// }
+
+// int GET_DUTY_25KGCM(int angle_val) {
+//   return ( (int)_map( 
+//       _map( (angle_val) , 0, 180, 750, 2250), 
+//       0, (1000000L / 50), 0, ((1 << 12) - 1) 
+//     ) 
+//   );
+// }
+
+// int angleToDutyMG996R(int angle) {
+//     angle = constrain(angle, 0, 180);
+//     int pulseWidth = map(angle, 0, 180, 500, 2500);
+//     return (int) (pulseWidth * 4095) / 20000;
+// }
+
+// int angleToDuty25kgcm(int angle) {
+//     angle = constrain(angle, 0, 180);
+//     int pulseWidth = map(angle, 0, 180, 750, 2250);
+//     return (int) (pulseWidth * 4095) / 20000;
+// }
+
+// void testDutyFunctions() {
+//     for (int angle = 0; angle <= 180; angle += 10) {
+//         int duty1 = GET_DUTY_MG996R(angle);
+//         int duty2 = angleToDutyMG996R(angle);
+//         std::cout << "Angle: " << angle << " GET_DUTY_MG996R: " << duty1 << " angleToDutyMG996R: " << duty2 << std::endl;
+
+//         int duty3 = GET_DUTY_25KGCM(angle);
+//         int duty4 = angleToDuty25kgcm(angle);
+//         std::cout << "Angle: " << angle << " GET_DUTY_25KGCM: " << duty3 << " angleToDuty25kgcm: " << duty4 << std::endl;
+//     }
+// }
+
 // int main() {
-//   std::array<PolarPoint, 13> polarData;
-//   std::array<CartesianPoint, 13> cartesianData;
-//   for (int i = 0; i < 13; i++) {
-//     polarData[i].angle = 30 + i * 10;
-//     polarData[i].distance = 150 / sin(polarData[i].angle * PI / 180);
-//     // polarData[i].distance = 150 + (1.0 / 100000) * pow(polarData[i].angle - 90, 6);
-//   }
-//   polarToCartesian(polarData, cartesianData);
-//   for (int i = 0; i < 13; i++) {
-//     std::cout << "Polar Data Point " << i << ": (" << polarData[i].angle << ", " << polarData[i].distance << ")" << std::endl;
-//     std::cout << "Cartesian Data Point " << i << ": (" << cartesianData[i].x << ", " << cartesianData[i].y << ")" << std::endl;
-//   }
-//   // int angle = 90;
-//   // int servoStep = 10;
-//   // for (int i = 0; i < 50; i++) {
-//   //   if (angle >= 150 || angle <= 30) {
-//   //     while (true) {
-//   //       if (angle >= 150 || angle <= 30) {
-//   //           servoStep = -1 * servoStep;
-//   //       }
-//   //       angle = angle + servoStep;
-//   //       std::cout << angle << std::endl;
-//   //       if (angle >= 150 || angle <= 30) {
-//   //         break;
-//   //       }
-//   //     }
-//   //   }
-//   //   if (angle >= 150 || angle <= 30) {
-//   //       servoStep = -1 * servoStep;
-//   //   }
-//   //   angle = angle + servoStep;
-//   //   std::cout << angle << std::endl;
-//   // }
-//   return 0;
+//     testDutyFunctions();
+//     return 0;
 // }
