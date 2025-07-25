@@ -1,34 +1,33 @@
 #include <Arduino.h>
-#include "hallsensor.h"
+#include "hallSensor.h"
+#include "constants.h"
+#include "logger.h"
 
-HallSensor::HallSensor(uint8_t hallPin)
-{
-  pin = hallPin;
-  pinMode(pin, INPUT);
+HallSensor::HallSensor(Logger& logger) : logger(logger) {
+  pinMode(HALL_SENSOR_PIN, INPUT);
   analogReadResolution(12); // Set ADC resolution to 12 bits
 }
 
 float HallSensor::readVoltage()
 {
-  int sensorValue = analogRead(pin);
-  float voltage = sensorValue * (4.5 / 4095.0); // Convert ADC value to voltage
+  int sensorValue = analogRead(HALL_SENSOR_PIN);
+  float voltage = sensorValue * (HALL_VOLTAGE_REF / 4095.0); // Convert ADC value to voltage
   return voltage;
 }
 
-bool HallSensor::detectMagnet(float voltage)
+bool HallSensor::magnetDetected(float voltage)
 {
-  if (voltage > 2.1)
-  {              // Adjust threshold as needed
-    return true; // Magnet detected
-  }
-  return false; // No magnet detected
+  if (voltage < MAGNET_THRESHOLD_VOLTAGE) { 
+    return true; 
+  } 
+  return false; 
 }
 
-String HallSensor::sense()
+void HallSensor::sense()
 {
   float hallVoltage = readVoltage();
-  bool magnetDetected = detectMagnet(hallVoltage);
-  String logMessage = "[Hall] Voltage: " + String(hallVoltage, 2) +
-                      " V, Magnet: " + (magnetDetected ? "Yes" : "No");
-  return logMessage;
+  bool magnet_detected = magnetDetected(hallVoltage);
+  String hallData = "[Hall] Voltage: " + String(hallVoltage, 2) +
+                      " V, Magnet: " + (magnet_detected ? "Yes" : "No");
+  logger.log(hallData);
 }

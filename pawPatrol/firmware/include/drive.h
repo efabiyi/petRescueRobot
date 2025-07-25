@@ -1,34 +1,24 @@
 #ifndef DRIVE_H
 #define DRIVE_H
+#include <Arduino.h>
+#include "constants.h"
+#include "logger.h"
 
-// Constants
-extern const int BASE_SPEED;
-extern const int MIN_SPEED;
-extern const int MAX_SPEED;
-extern const float KP;
-extern const float KD;
+class Drive {
+    private:
+        Logger &logger;
 
-// Pin definitions
-extern const int LEFT_SENSOR;
-extern const int MIDDLE_SENSOR;
-extern const int RIGHT_SENSOR;
-extern const int FWD_LEFT_PWM;
-extern const int BWD_LEFT_PWM;
-extern const int FWD_RIGHT_PWM;
-extern const int BWD_RIGHT_PWM;
-extern const int FWD_LEFT_CHAN;
-extern const int BWD_LEFT_CHAN;
-extern const int FWD_RIGHT_CHAN;
-extern const int BWD_RIGHT_CHAN;
+    public:
+        Drive(Logger &logger);
+        void initializeDrive();
+        void drive();
+};
 
-// Function declarations
-void initializeDrive();
 void leftDriveForward(int speed);
 void leftDriveBackward(int speed);
 void rightDriveForward(int speed);
 void rightDriveBackward(int speed);
-float calculateError();
-String drive();
+float calculateError(int l, int r);
 void testDrive(int leftSpeed, int rightSpeed);
 void testDriveBwd(int leftSpeed, int rightSpeed);
 

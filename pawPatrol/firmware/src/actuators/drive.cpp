@@ -1,27 +1,8 @@
 #include <Arduino.h>
 #include "driver/ledc.h"
 #include "drive.h"
+#include "constants.h"
 #include "logger.h"
-
-// Constants
-const int BASE_SPEED = 1000;
-const int MIN_SPEED = 0;
-const int MAX_SPEED = 1600;
-const int THRESHOLD = 130;
-const float KP = 0.8f;
-const float KD = 0.0f;
-
-// Pin definitions
-const int LEFT_SENSOR = 36;
-const int RIGHT_SENSOR = 34;
-const int FWD_LEFT_PWM = 14;
-const int BWD_LEFT_PWM = 4;
-const int FWD_RIGHT_PWM = 13;
-const int BWD_RIGHT_PWM = 5;
-const int FWD_LEFT_CHAN = 0;
-const int BWD_LEFT_CHAN = 1;
-const int FWD_RIGHT_CHAN = 2;
-const int BWD_RIGHT_CHAN = 3;
 
 // Global variables
 float lastError = 0.0;
@@ -29,8 +10,11 @@ unsigned long lastTime = 0;
 float lastCorrection = 0.0;
 bool offLine = false;
 
-const int OFF_LINE_THRESHOLD = 700;
 int offLineCounter = OFF_LINE_THRESHOLD;
+
+Drive::Drive(Logger& logger) : logger(logger) {
+    // Any other initialization if needed
+}
 
 void debugPrint(const String &message) {
   // Serial.print(message);     // Comment out to improve performance
@@ -41,7 +25,7 @@ void debugPrintln(const String &message) {
   Serial.println();
 }
 
-void initializeDrive() {
+void Drive::initializeDrive() {
   ledcSetup(FWD_LEFT_CHAN, 250, 12);
   ledcSetup(BWD_LEFT_CHAN, 250, 12);
   ledcSetup(FWD_RIGHT_CHAN, 250, 12);
@@ -90,7 +74,7 @@ bool isOffLine(int l, int r) {
   return (l < THRESHOLD && r < THRESHOLD);
 }
 
-String drive() {
+void Drive::drive() {
   unsigned long now = millis();
   float deltaTime = (now - lastTime) / 1000.0;
   lastTime = now;
@@ -152,10 +136,9 @@ String drive() {
     debugPrintln(String(constrain(rightSpeed, MIN_SPEED, MAX_SPEED)));
     pidData = "PID Data: Error: " + String(error) + ", Derivative: " + String(derivative) + ", Correction: " + String(correction) + ", Left Speed: " + String(leftSpeed) + ", Right Speed: " + String(rightSpeed);
   }
-  String driveData = "[drive] Reflectance Data: Left:" + String(leftReading) + " - Right: " + String(rightReading) + " - Off Line: " + (offLine ? "Yes" : "No");
+  String driveData = "[Drive] Reflectance Data: Left:" + String(leftReading) + " - Right: " + String(rightReading) + " - Off Line: " + (offLine ? "Yes" : "No");
+  logger.log(driveData + " | " + pidData);
   delay(10);
-
-  return driveData + " | " + pidData;
 }
 
 void testDrive(int leftSpeed, int rightSpeed) {

@@ -5,31 +5,23 @@
 #include "wifiManager.h"
 #include "drive.h"
 #include "detect.h"
+#include "scanner.h"
 
-unsigned long lastLogTimeHall = 0;
-unsigned long lastLogTimeDrive = 0;
-const unsigned long hallLogInterval = 1000; //
-
-HallSensor hallSensor(32); // GPIO pin for the hall sensor
+Logger logger;
 WifiManager wifiMgr;
+
+HallSensor hallSensor(logger);
+Drive driver(logger);
+Scanner scanner(logger);
 
 void setup() {
   Serial.begin(115200);
   wifiMgr.startWifi();
-  initializeDrive();
+  logger.begin(); // Launch logger task (on secibd core!)
+  driver.initializeDrive();
 }
 
 void loop() {
-  String driveData = drive();
-  String hallData = hallSensor.sense();
-
-  //logging
-  unsigned long currentTime = millis();
-  if (currentTime - lastLogTimeHall>= hallLogInterval) {
-    lastLogTimeHall = currentTime;
-    Logger::send(driveData + "\n" + hallData);
-  }
-
+  driver.drive();
+  hallSensor.sense();
 }
-
-
