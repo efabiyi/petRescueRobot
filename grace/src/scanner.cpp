@@ -129,7 +129,6 @@ void Scanner::printScanData() {
 
 bool Scanner::closestObjectIsWall() {
     PolarPoint obj = getClosestObject();
-    if (obj.angle <= 30 || obj.angle >= 150) return true;
     int objectIndex = (obj.angle - MIN_ANGLE) / SERVO_STEP_SIZE;
     int startIndex = objectIndex;
     int endIndex = objectIndex;
