@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>👁️ WatchDog </title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
   <header>
     <h1>👁️ WatchDog 🐶</h1>
@@ -12,6 +14,19 @@
   </header>
 
   <main class="sensor-grid">
+
+    <section class="status-bar">
+      <div class="status-item">
+        <strong>🤖 Current State:</strong>
+        <span id="robotState">Waiting for state...</span>
+      </div>
+      <div class="status-item">
+        <strong>🐾 Pet Count:</strong>
+        <span id="petCount">0</span>
+      </div>
+    </section>
+
+
     <section class="sensor-card">
       <h2>🐾 Hall Effect Sensor</h2>
       <pre id="hallLogs" class="log-box">Waiting for logs...</pre>
@@ -33,4 +48,5 @@
 
   <script src="app.js"></script>
 </body>
+
 </html>

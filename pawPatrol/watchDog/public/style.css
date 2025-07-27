@@ -29,6 +29,25 @@ header p {
   color: #a9d6e5;
 }
 
+.status-bar {
+  display: flex;
+  justify-content: space-around;
+  background-color: #133150;
+  padding: 1em 2em;
+  border-bottom: 2px solid #f4d35e;
+  color: #ffffff;
+}
+
+.status-item {
+  font-size: 1.2em;
+  color: #f4d35e;
+}
+.status-item span {
+  margin-left: 0.5em;
+  color: #a9d6e5;
+}
+
+
 .sensor-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));

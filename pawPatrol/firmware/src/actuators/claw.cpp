@@ -1,174 +1,133 @@
 #include <Arduino.h>
-#include <ESP32Servo.h>
 #include "claw.h"
+#include "pins.h"
 
-const int SERVO_ROTATE_Z     = 13;
-const int SERVO_FORWARD_BACK = 14;
-const int SERVO_UP_DOWN      = 18;
-const int SERVO_CLAW         = 19;
-const int PULLEY_MOTOR      = 25;
-
-Servo servoRotateZ;     // Base rotation servo
-Servo servoForwardBack; // Arm extension servo
-Servo servoUpDown;      // Arm height servo
-Servo servoClaw;        // Claw grip servo
-
-// Claw position constants
-const int CLAW_OPEN = 160;
-const int CLAW_CLOSED = 60;
-const int CLAW_UP = 150;
-const int CLAW_DOWN = 30;
-const int CLAW_FORWARD = 150;
-const int CLAW_BACK = 30;
-
-// Current positions
-static int rotateZPosition = 90;
-static int forwardBackPosition = 90;
-static int upDownPosition = 90;
-static int clawPosition = 90;
-
-void initiateClaw() {
-    pinMode(SERVO_CLAW, OUTPUT);
-    pinMode(SERVO_ROTATE_Z, OUTPUT);
-    pinMode(SERVO_FORWARD_BACK, OUTPUT);
-    pinMode(SERVO_UP_DOWN, OUTPUT);
-    pinMode(PULLEY_MOTOR, OUTPUT);
-
-    servoRotateZ.attach(SERVO_ROTATE_Z);
-    servoForwardBack.attach(SERVO_FORWARD_BACK);
-    servoUpDown.attach(SERVO_UP_DOWN);
-    servoClaw.attach(SERVO_CLAW);
-
-    // Initialize to neutral positions
-    setClawPosition(90);
-    setRotateZPosition(90);
-    setForwardBackPosition(90);
-    setUpDownPosition(90);
+Claw::Claw(Logger& logger) : logger(logger) {
+    z = Z_IDLE_ANGLE;
+    base = BASE_IDLE_ANGLE;
+    elbow = ELBOW_IDLE_ANGLE;
+    gripper = GRIPPER_OPEN_ANGLE;
 }
 
-void handleGrabPet() {
-    static enum {
-        PREPARE,
-        APPROACH,
-        GRAB,
-        LIFT,
-        COMPLETE
-    } grabState = PREPARE;
-    
-    static unsigned long stateStartTime = 0;
-    const unsigned long MOVEMENT_DELAY = 1000;
-    
-    switch(grabState) {
-        case PREPARE:
-            setClawPosition(CLAW_OPEN);
-            setUpDownPosition(CLAW_UP);
-            setForwardBackPosition(CLAW_BACK);
-            stateStartTime = millis();
-            grabState = APPROACH;
-            break;
-            
-        case APPROACH:
-            if (millis() - stateStartTime > MOVEMENT_DELAY) {
-                setForwardBackPosition(CLAW_FORWARD);
-                setUpDownPosition(CLAW_DOWN);
-                stateStartTime = millis();
-                grabState = GRAB;
-            }
-            break;
-            
-        case GRAB:
-            if (millis() - stateStartTime > MOVEMENT_DELAY) {
-                setClawPosition(CLAW_CLOSED);
-                stateStartTime = millis();
-                grabState = LIFT;
-            }
-            break;
-            
-        case LIFT:
-            if (millis() - stateStartTime > MOVEMENT_DELAY) {
-                setUpDownPosition(CLAW_UP);
-                setForwardBackPosition(CLAW_BACK);
-                stateStartTime = millis();
-                grabState = COMPLETE;
-            }
-            break;
-            
-        case COMPLETE:
-            if (millis() - stateStartTime > MOVEMENT_DELAY) {
-                grabState = PREPARE;
-            }
-            break;
-    }
+void Claw::initialize() {
+    ledcSetup(Z_SERVO_CHANNEL, 50, 12);
+    ledcSetup(BASE_SERVO_CHANNEL, 50, 12);
+    ledcSetup(ELBOW_SERVO_CHANNEL, 50, 12);
+    ledcSetup(GRIPPER_SERVO_CHANNEL, 50, 12);
+
+    ledcAttachPin(Z_SERVO_PIN, Z_SERVO_CHANNEL);
+    ledcAttachPin(BASE_SERVO_PIN, BASE_SERVO_CHANNEL);
+    ledcAttachPin(ELBOW_SERVO_PIN, ELBOW_SERVO_CHANNEL);
+    ledcAttachPin(GRIPPER_SERVO_PIN, GRIPPER_SERVO_CHANNEL);
+
+    ledcWrite(Z_SERVO_CHANNEL, angleToDutyMG996R(Z_IDLE_ANGLE));
+    ledcWrite(BASE_SERVO_CHANNEL, angleToDuty25kgcm(BASE_IDLE_ANGLE));
+    ledcWrite(ELBOW_SERVO_CHANNEL, angleToDuty25kgcm(ELBOW_IDLE_ANGLE));
+    ledcWrite(GRIPPER_SERVO_CHANNEL, angleToDutyMG996R(GRIPPER_OPEN_ANGLE));
+
+    pinMode(HALL_PIN, INPUT);
+
+    moveToIdlePos();
 }
 
-void handleStorePet() {
-    static enum {
-        MOVE_TO_STORAGE,
-        RELEASE,
-        RETRACT,
-        COMPLETE
-    } storeState = MOVE_TO_STORAGE;
-    
-    static unsigned long stateStartTime = 0;
-    const unsigned long MOVEMENT_DELAY = 1000;
-    
-    switch(storeState) {
-        case MOVE_TO_STORAGE:
-            setRotateZPosition(0);  // Rotate to storage position
-            stateStartTime = millis();
-            storeState = RELEASE;
-            break;
-            
-        case RELEASE:
-            if (millis() - stateStartTime > MOVEMENT_DELAY) {
-                setClawPosition(CLAW_OPEN);
-                stateStartTime = millis();
-                storeState = RETRACT;
-            }
-            break;
-            
-        case RETRACT:
-            if (millis() - stateStartTime > MOVEMENT_DELAY) {
-                setUpDownPosition(CLAW_UP);
-                setForwardBackPosition(CLAW_BACK);
-                stateStartTime = millis();
-                storeState = COMPLETE;
-            }
-            break;
-            
-        case COMPLETE:
-            if (millis() - stateStartTime > MOVEMENT_DELAY) {
-                setRotateZPosition(90);  // Return to center position
-                storeState = MOVE_TO_STORAGE;
-            }
-            break;
-    }
+void Claw::moveToIdlePos() {
+    ledcWrite(Z_SERVO_CHANNEL, angleToDutyMG996R(Z_IDLE_ANGLE));
+    ledcWrite(BASE_SERVO_CHANNEL, angleToDuty25kgcm(BASE_IDLE_ANGLE));
+    ledcWrite(ELBOW_SERVO_CHANNEL, angleToDuty25kgcm(ELBOW_IDLE_ANGLE));
+    ledcWrite(GRIPPER_SERVO_CHANNEL, angleToDutyMG996R(GRIPPER_OPEN_ANGLE));
 }
 
-void setClawPosition(int position) {
-    if (position >= 0 && position <= 180) {
-        clawPosition = position;
-        servoClaw.write(position);
-    }
+void Claw::openGripper() {
+    gripper = GRIPPER_OPEN_ANGLE;
+    ledcWrite(GRIPPER_SERVO_CHANNEL, angleToDutyMG996R(GRIPPER_OPEN_ANGLE));
 }
 
-void setRotateZPosition(int position) {
-    if (position >= 0 && position <= 180) {
-        rotateZPosition = position;
-        servoRotateZ.write(position);
-    }
+void Claw::closeGripper() {
+    gripper = GRIPPER_CLOSE_ANGLE;
+    ledcWrite(GRIPPER_SERVO_CHANNEL, angleToDutyMG996R(GRIPPER_CLOSE_ANGLE));
 }
 
-void setForwardBackPosition(int position) {
-    if (position >= 0 && position <= 180) {
-        forwardBackPosition = position;
-        servoForwardBack.write(position);
-    }
+void Claw::setZAxisServo(int angle) {
+    angle = constrain(angle, Z_MIN_ANGLE, Z_MAX_ANGLE);
+    z = angle;
+    ledcWrite(Z_SERVO_CHANNEL, angleToDutyMG996R(angle));
 }
 
-void setUpDownPosition(int position) {
-    if (position >= 0 && position <= 180) {
-        upDownPosition = position;
-        servoUpDown.write(position);
-    }
+void Claw::setBaseServo(int angle) {
+    angle = constrain(angle, BASE_MIN_ANGLE, BASE_MAX_ANGLE);
+    base = angle;
+    ledcWrite(BASE_SERVO_CHANNEL, angleToDuty25kgcm(angle));
+}
+
+void Claw::setElbowServo(int angle) {
+    angle = constrain(angle, ELBOW_MIN_ANGLE, ELBOW_MAX_ANGLE);
+    elbow = angle;
+    ledcWrite(ELBOW_SERVO_CHANNEL, angleToDuty25kgcm(angle));
+}
+
+float Claw::distanceFromOrigin(float x, float y) {
+    return sqrt(x * x + y * y);
+}
+
+float Claw::getElbowAngle(float x, float y) { 
+    float d = distanceFromOrigin(x, y); 
+    if (d > DABI + XIAOBI) return -1; 
+    return degrees(acos(((DABI * DABI) + (XIAOBI * XIAOBI) - d * d) / (2 * DABI * XIAOBI))); 
 } 
+  
+float Claw::getBaseAngle(float x, float y) { 
+    float d = distanceFromOrigin(x, y); 
+    if (d > DABI + XIAOBI) return -1; 
+        
+    float beta = degrees(acos(((DABI * DABI) + (d * d) - (XIAOBI * XIAOBI)) / (2 * DABI * d))); 
+    float alpha = degrees(atan2(y,x)); 
+
+    float shoulderAngle = beta + alpha; 
+
+    return shoulderAngle; 
+}
+
+PolarPoint calculateOffset(PolarPoint scannerPoint) {
+    PolarPoint clawPoint;
+    if (scannerPoint.angle != 90) {
+        clawPoint.angle = degrees(atan2(OFFSET + scannerPoint.distance * sin(radians(scannerPoint.angle)), scannerPoint.distance * cos(radians(scannerPoint.angle))));
+    } else {
+        clawPoint.angle = 90;
+    }
+    clawPoint.distance = sqrt((OFFSET + scannerPoint.distance * sin(radians(scannerPoint.angle))) * (OFFSET + scannerPoint.distance * sin(radians(scannerPoint.angle))) + (scannerPoint.distance * cos(radians(scannerPoint.angle))) * (scannerPoint.distance * cos(radians(scannerPoint.angle)))) - 70;
+    return clawPoint;
+}
+
+void Claw::searchForPet(int angle, int distance) {
+    setZAxisServo(angle);
+    int x = distance;
+    for (int y = 50; y > 0; y -= 5) {
+        int baseAngle = getBaseAngle(x, y);
+        int elbowAngle = getElbowAngle(x, y);
+        if (baseAngle < 0 || elbowAngle < 0) continue;
+        setBaseServo(baseAngle);
+        setElbowServo(elbowAngle);
+    }
+}
+
+void Claw::grabPet(int angle, int distance) {
+    int x = distance;
+    int y = 30; // height of pet
+    int elbowAngle = getElbowAngle(x, y);
+    int baseAngle = getBaseAngle(x, y);
+    if (elbowAngle < 0 || baseAngle < 0) return;
+    openGripper();
+    delay(1000);
+    setZAxisServo(angle);
+    delay(1000);
+    setElbowServo(elbowAngle);
+    delay(1000);
+    setBaseServo(baseAngle);
+    delay(1000);
+    closeGripper();
+    delay(1000);
+    setBaseServo(BASE_IDLE_ANGLE);
+    setElbowServo(ELBOW_IDLE_ANGLE);
+    setZAxisServo(Z_IDLE_ANGLE);
+    delay(1000);
+}
