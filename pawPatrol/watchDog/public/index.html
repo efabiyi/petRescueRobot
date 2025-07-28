@@ -13,34 +13,35 @@
     <p>Keeping a close eye on your sensors.</p>
   </header>
 
-  <main class="sensor-grid">
+  <main>
+    <div class="dashboard-content">
+      <section class="status-bar">
+        <div class="status-item">
+          <strong>🤖 State:</strong> <span id="robotState">Idle</span> &nbsp;&nbsp;
+          <strong>🐾 Pet Count:</strong> <span id="petCount">0</span>
+        </div>
+      </section>
 
-    <section class="status-bar">
-      <div class="status-item">
-        <strong>🤖 Current State:</strong>
-        <span id="robotState">Waiting for state...</span>
+
+      <div class="sensor-grid">
+        <section class="sensor-card">
+          <h2>🐾 Hall Effect Sensor</h2>
+          <pre id="hallLogs" class="log-box">Waiting for logs...</pre>
+        </section>
+
+        <section class="sensor-card">
+          <h2>🕶️ Reflectance Sensor</h2>
+          <pre id="driveLogs" class="log-box">Waiting for logs...</pre>
+        </section>
+
+        <section class="sensor-card">
+          <h2>🔦 Laser Distance Sensor</h2>
+          <pre id="laserLogs" class="log-box">Waiting for logs...</pre>
+        </section>
       </div>
-      <div class="status-item">
-        <strong>🐾 Pet Count:</strong>
-        <span id="petCount">0</span>
-      </div>
-    </section>
-
-
-    <section class="sensor-card">
-      <h2>🐾 Hall Effect Sensor</h2>
-      <pre id="hallLogs" class="log-box">Waiting for logs...</pre>
-    </section>
-
-    <section class="sensor-card">
-      <h2>🕶️ Reflectance Sensor</h2>
-      <pre id="driveLogs" class="log-box">Waiting for logs...</pre>
-    </section>
-
-    <section class="sensor-card">
-      <h2>🔦 Laser Distance Sensor</h2>
-      <pre id="laserLogs" class="log-box">Waiting for logs...</pre>
+    </div>
   </main>
+
 
   <footer>
     <p>🐶 Team 3! &copy; 2025</p>

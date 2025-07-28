@@ -125,11 +125,10 @@ void Scanner::printScanData() {
         cartesianData[i].y = (scanData[i].distance) * sin(radiansVal);
         Serial.println("x: " + String(cartesianData[i].x) + " y: " + String(cartesianData[i].y)); 
     }
-}
+}   
 
 bool Scanner::closestObjectIsWall() {
     PolarPoint obj = getClosestObject();
-    if (obj.angle <= 30 || obj.angle >= 150) return true;
     int objectIndex = (obj.angle - MIN_ANGLE) / SERVO_STEP_SIZE;
     int startIndex = objectIndex;
     int endIndex = objectIndex;

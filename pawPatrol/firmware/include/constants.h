@@ -3,12 +3,6 @@
 
 //INIT CONSTANTS
 
-const int IN_RANGE_DISTANCE = 300;
-const int REACHABLE_DISTANCE = 100;
-const int BASE_SPEED = 1500;
-const int THRESHOLD = 0;
-const int APPROACH_SPEED = 700;
-const int COOL_DOWN = 3000;
 
 
 //PIN DEFINITIONS

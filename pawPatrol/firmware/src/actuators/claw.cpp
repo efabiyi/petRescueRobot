@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include "claw.h"
-#include "pins.h"
+#include "constants.h"
 
 Claw::Claw(Logger& logger) : logger(logger) {
     z = Z_IDLE_ANGLE;

@@ -79,7 +79,7 @@ void lineFollow(int baseSpeed, int threshold, Logger& logger) {
   debugPrint(" - Right: ");
   debugPrint(String(rightReading));
 
-  bool offLine = leftReading < threshold || rightReading < threshold;
+  bool offLine = leftReading <= threshold && rightReading <= threshold;
 
   float error;
   float derivative;
@@ -92,7 +92,7 @@ void lineFollow(int baseSpeed, int threshold, Logger& logger) {
     float deltaTime = (now - lastTime) / 1000.0;
     lastTime = now;
 
-    error = (leftReading - rightReading) / 10000.0;
+    error = (leftReading - rightReading) / (leftReading + rightReading + 0.001);
     derivative = (error - lastError) / deltaTime;
     correction = (KP * error) + (KD * derivative);
 
@@ -126,7 +126,7 @@ void lineFollow(int baseSpeed, int threshold, Logger& logger) {
   //   lastWriteTime = millis();
   // }
 
-  String reflectanceData = "[Drive] Reflectance Data: Off Line: " + (offLine ? "Yes" : "No");
+  String reflectanceData = "[Drive] Drive Data: Off Line: " + String(offLine ? "Yes" : "No");
   
   logger.log(reflectanceData);
   delay(10);
