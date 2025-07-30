@@ -4,8 +4,8 @@
 // Motor pins
 constexpr int LEFT_SENSOR = 38;
 constexpr int RIGHT_SENSOR = 37;
-constexpr int FWD_LEFT_PWM = 33;
-constexpr int BWD_LEFT_PWM = 32;
+constexpr int FWD_LEFT_PWM = 32;
+constexpr int BWD_LEFT_PWM = 33;
 constexpr int FWD_RIGHT_PWM = 13;
 constexpr int BWD_RIGHT_PWM = 14;
 constexpr int FWD_LEFT_CHAN = 0;

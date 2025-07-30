@@ -7,9 +7,27 @@ int angleToDutyMG996R(int angle) {
     return (int) (pulseWidth * 4095) / 20000;
 }
 
-int angleToDuty25kgcm(int angle) {
+int angleToDutyScanner(int angle) {
     angle = constrain(angle, 0, 180);
-    int pulseWidth = map(angle, 0, 180, 750, 2250);
+    int pulseWidth = map(angle, 0, 180, 350, 2500);
+    return (int) (pulseWidth * 4095) / 20000;
+}
+
+int angleToDutyZ(int angle) {
+    angle = constrain(angle, 0, 180);
+    int pulseWidth = map(angle, 0, 180, 800, 2100);
+    return (int) (pulseWidth * 4095) / 20000;
+}
+
+int angleToDutyBase(int angle) {
+    angle = constrain(angle, 0, 180);
+    int pulseWidth = map(angle, 0, 180, 850, 2100);
+    return (int) (pulseWidth * 4095) / 20000;
+}
+
+int angleToDutyElbow(int angle) {
+    angle = constrain(angle, 0, 180);
+    int pulseWidth = map(angle, 0, 180, 900, 2100);
     return (int) (pulseWidth * 4095) / 20000;
 }
 

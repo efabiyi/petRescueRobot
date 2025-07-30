@@ -8,8 +8,8 @@ class Scanner {
 private:
     static constexpr int SCAN_DATA_SIZE = 13;
     static constexpr int SERVO_STEP_SIZE = 10;
-    static constexpr int MAX_ANGLE = 150;
-    static constexpr int MIN_ANGLE = 30;
+    static constexpr int MAX_ANGLE = 170;
+    static constexpr int MIN_ANGLE = 10;
     static constexpr int MAX_DISTANCE = 9999;
     static constexpr int IN_RANGE_DISTANCE = 300;
     
@@ -28,10 +28,10 @@ public:
     void reset();
     int getServoAngle() { return servoAngle; }
     PolarPoint getClosestObject();
-    void scanOneStep(int scanDelay);
+    bool scanOneStep(int scanDelay);
     bool completedScan();
     void printScanData();
-    bool closestObjectIsWall();
+    bool isWall(PolarPoint data[], int size);
     PolarPoint honeIn(int angle);
 };
 

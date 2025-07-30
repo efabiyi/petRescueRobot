@@ -4,7 +4,7 @@
 #include "pins.h"
 
 Scanner::Scanner() {
-    servoStep = SERVO_STEP_SIZE;
+    servoStep = -1 * SERVO_STEP_SIZE;
     servoAngle = 90;
 }
 
@@ -21,7 +21,9 @@ bool Scanner::initialize() {
 }
 
 void Scanner::reset() {
-    setServoAngle(90);
+    servoAngle = 90;
+    servoStep = -1 * SERVO_STEP_SIZE;
+    setServoAngle(servoAngle);
     clearScanData();
 }
 
@@ -40,7 +42,21 @@ bool Scanner::completedScan() {
     return servoAngle >= MAX_ANGLE || servoAngle <= MIN_ANGLE;
 }
 
-void Scanner::scanOneStep(int scanDelay) {
+// void Scanner::scanOneStep(int scanDelay) {
+//     if (completedScan()) {
+//         servoStep = -1 * servoStep;
+//     }
+//     servoAngle = servoAngle + servoStep;
+//     setServoAngle(servoAngle);
+//     delay(scanDelay);
+//     int distance = readDistance();
+//     // Serial.println(distance);
+//     int index = (servoAngle - MIN_ANGLE) / SERVO_STEP_SIZE;
+//     scanData[index].distance = distance;
+//     scanData[index].angle = servoAngle;
+// }
+
+bool Scanner::scanOneStep(int scanDelay) {
     if (completedScan()) {
         servoStep = -1 * servoStep;
     }
@@ -48,57 +64,54 @@ void Scanner::scanOneStep(int scanDelay) {
     setServoAngle(servoAngle);
     delay(scanDelay);
     int distance = readDistance();
-    // Serial.println(distance);
-    int index = (servoAngle - MIN_ANGLE) / SERVO_STEP_SIZE;
-    scanData[index].distance = distance;
-    scanData[index].angle = servoAngle;
+    return (distance <= IN_RANGE_DISTANCE);
 }
 
 PolarPoint Scanner::honeIn(int angle) {
-    int minAngle = max(angle - 20, MIN_ANGLE);
-    int maxAngle = min(angle + 20, MAX_ANGLE);
-    int ang1, ang2;
-    int d1 = MAX_DISTANCE;
-    int d2 = MAX_DISTANCE;
+    int minAngle = max(angle - 5, MIN_ANGLE);
+    int maxAngle = min(angle + 5, MAX_ANGLE);
     PolarPoint obj;
     obj.angle = -1;
     obj.distance = MAX_DISTANCE;
-    for (int theta = minAngle; theta <= maxAngle; theta += 5) {
+    if (angle < 0) return obj;
+    for (int theta = minAngle; theta <= maxAngle; theta += 2) {
         setServoAngle(theta);
-        delay(200);
-        int distance = readDistance();
-        if (distance < d1) {
-            ang1 = theta;
-            d1 = distance;
+        delay(500);
+        int distances[10];
+        double sum = 0.0;
+        for (int i = 0; i < 10; i++) {
+            distances[i] = readDistance();
+            sum += distances[i];
         }
-    }
-    for (int theta = maxAngle; theta >= minAngle; theta -= 5) {
-        setServoAngle(theta);
-        delay(200);
-        int distance = readDistance();
-        if (distance < d2) {
-            ang2 = theta;
-            d2 = distance;
+        double distance = sum / 10.0;
+        for (int i = 0; i < 10; i++) {
+            // Serial.print(String(distances[i]) + ", ");
         }
+        // Serial.println("");
+        if (distance < obj.distance) {
+            obj.angle = theta;
+            obj.distance = distance;
+        }
+        // Serial.println("angle: " + String(theta) + " | distance: " + String(distance));
     }
-    obj.angle = (ang1 + ang2) / 2;
-    obj.distance = (d1 + d2) / 2;
     return obj;
 }
 
 void Scanner::setServoAngle(int angle) {
-    ledcWrite(SERVO_CHANNEL, angleToDutyMG996R(angle));
+    ledcWrite(SERVO_CHANNEL, angleToDutyScanner(angle));
 }
 
 PolarPoint Scanner::getClosestObject() {
     PolarPoint closestObject;
     closestObject.distance = MAX_DISTANCE;
-    closestObject.angle = 0;
-
-    for (int i = 0; i < SCAN_DATA_SIZE; i++) {
-        if (scanData[i].distance < closestObject.distance) {
-            closestObject.distance = scanData[i].distance;
-            closestObject.angle = scanData[i].angle;
+    closestObject.angle = -1;
+    for (int i = MIN_ANGLE; i <= MAX_ANGLE; i += 5) {
+        setServoAngle(i);
+        delay(50);
+        int distance = readDistance();
+        if (distance < closestObject.distance) {
+            closestObject.distance = distance;
+            closestObject.angle = i;
         }
     }
 
@@ -127,63 +140,66 @@ void Scanner::printScanData() {
     }
 }
 
-bool Scanner::closestObjectIsWall() {
-    PolarPoint obj = getClosestObject();
-    int objectIndex = (obj.angle - MIN_ANGLE) / SERVO_STEP_SIZE;
-    int startIndex = objectIndex;
-    int endIndex = objectIndex;
-    for (int i = objectIndex; i < SCAN_DATA_SIZE; i++) {
-        if (scanData[i].distance > 1000) {
-            break;
-        }
-        endIndex = i;
-    }
-    for (int i = objectIndex; i >= 0; i--) {
-        if (scanData[i].distance > 1000) {
-            break;
-        }
-        startIndex = i;
-    }
+// bool Scanner::isWall(PolarPoint data[], int size) {
+//     int threshold = 1000;
+//     int startIndex = -1;
+//     int endIndex = -1;
+//     bool inCluster = false;
 
-    CartesianPoint cartesianData[SCAN_DATA_SIZE];
+//     for (int i = 0; i < size; i++) {
+//         if (!inCluster && data[i].distance < threshold) {
+//             startIndex = i;
+//             inCluster = true;
+//         }
+//         else if (inCluster && data[i].distance >= threshold) {
+//             endIndex = i - 1;
+//             break;
+//         }
+//     }
 
-    for (int i = startIndex; i <= endIndex; i++) {
-        float radiansVal = radians(scanData[i].angle);
-        cartesianData[i].x = (scanData[i].distance) * cos(radiansVal);
-        cartesianData[i].y = (scanData[i].distance) * sin(radiansVal);
-        // Serial.println("x: " + String(cartesianData[i].x) + " y: " + String(cartesianData[i].y)); 
-    }
+//     if (inCluster && endIndex == -1) {
+//         endIndex = size - 1;
+//     }
 
-    int width = cartesianData[endIndex].x - cartesianData[startIndex].x;
-    // Serial.println("width: " + String(width));
+//     CartesianPoint cartesianData[SCAN_DATA_SIZE];
 
-    float secondDeriv[SCAN_DATA_SIZE - 2];
+//     for (int i = startIndex; i <= endIndex; i++) {
+//         float radiansVal = radians(scanData[i].angle);
+//         cartesianData[i].x = (scanData[i].distance) * cos(radiansVal);
+//         cartesianData[i].y = (scanData[i].distance) * sin(radiansVal);
+//         // Serial.println("x: " + String(cartesianData[i].x) + " y: " + String(cartesianData[i].y)); 
+//     }
 
-    for (int i = startIndex + 1; i <= endIndex - 1; i++) {
-        float prevY = cartesianData[i - 1].y;
-        float y = cartesianData[i].y;
-        float nextY = cartesianData[i + 1].y;
+//     int width = cartesianData[endIndex].x - cartesianData[startIndex].x;
+//     // Serial.println("width: " + String(width));
 
-        float h1 = cartesianData[i].x - cartesianData[i - 1].x;
-        float h2 = cartesianData[i + 1].x - cartesianData[i].x;
-        float denom1 = h1 * (h1 + h2);
-        float denom2 = h1 * h2;
-        float denom3 = h2 * (h1 + h2);
+//     float secondDeriv[SCAN_DATA_SIZE - 2];
 
-        float deriv = 0.0;
+//     for (int i = startIndex + 1; i <= endIndex - 1; i++) {
+//         float prevY = cartesianData[i - 1].y;
+//         float y = cartesianData[i].y;
+//         float nextY = cartesianData[i + 1].y;
 
-        if (denom1 != 0 && denom2 != 0 && denom3 != 0) {
-            deriv = 2.0f / denom1 * prevY - 2.0f / denom2 * y + 2.0f / denom3 * nextY;
-        } else {
-            deriv = 0.0;  // Assign a safe default
-        }
+//         float h1 = cartesianData[i].x - cartesianData[i - 1].x;
+//         float h2 = cartesianData[i + 1].x - cartesianData[i].x;
+//         float denom1 = h1 * (h1 + h2);
+//         float denom2 = h1 * h2;
+//         float denom3 = h2 * (h1 + h2);
 
-        secondDeriv[i] = deriv;
-        if (deriv > 0.03) {
-            return false;
-        }
-        // Serial.println("deriv: " + String(deriv));
-    }
+//         float deriv = 0.0;
 
-    return false;
-}
+//         if (denom1 != 0 && denom2 != 0 && denom3 != 0) {
+//             deriv = 2.0f / denom1 * prevY - 2.0f / denom2 * y + 2.0f / denom3 * nextY;
+//         } else {
+//             deriv = 0.0;  // Assign a safe default
+//         }
+
+//         secondDeriv[i] = deriv;
+//         if (deriv > 0.03) {
+//             return false;
+//         }
+//         // Serial.println("deriv: " + String(deriv));
+//     }
+
+//     return false;
+// }

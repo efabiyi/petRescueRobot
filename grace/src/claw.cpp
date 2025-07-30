@@ -3,10 +3,10 @@
 #include "pins.h"
 
 Claw::Claw() {
-    z = Z_IDLE_ANGLE;
-    base = BASE_IDLE_ANGLE;
-    elbow = ELBOW_IDLE_ANGLE;
-    gripper = GRIPPER_OPEN_ANGLE;
+    zAngle = Z_IDLE_ANGLE;
+    baseAngle = BASE_IDLE_ANGLE;
+    elbowAngle = ELBOW_IDLE_ANGLE;
+    gripperAngle = GRIPPER_OPEN_ANGLE;
 }
 
 void Claw::initialize() {
@@ -20,49 +20,54 @@ void Claw::initialize() {
     ledcAttachPin(ELBOW_SERVO_PIN, ELBOW_SERVO_CHANNEL);
     ledcAttachPin(GRIPPER_SERVO_PIN, GRIPPER_SERVO_CHANNEL);
 
-    ledcWrite(Z_SERVO_CHANNEL, angleToDutyMG996R(Z_IDLE_ANGLE));
-    ledcWrite(BASE_SERVO_CHANNEL, angleToDuty25kgcm(BASE_IDLE_ANGLE));
-    ledcWrite(ELBOW_SERVO_CHANNEL, angleToDuty25kgcm(ELBOW_IDLE_ANGLE));
-    ledcWrite(GRIPPER_SERVO_CHANNEL, angleToDutyMG996R(GRIPPER_OPEN_ANGLE));
-
     pinMode(HALL_PIN, INPUT);
 
     moveToIdlePos();
 }
 
 void Claw::moveToIdlePos() {
-    ledcWrite(Z_SERVO_CHANNEL, angleToDutyMG996R(Z_IDLE_ANGLE));
-    ledcWrite(BASE_SERVO_CHANNEL, angleToDuty25kgcm(BASE_IDLE_ANGLE));
-    ledcWrite(ELBOW_SERVO_CHANNEL, angleToDuty25kgcm(ELBOW_IDLE_ANGLE));
-    ledcWrite(GRIPPER_SERVO_CHANNEL, angleToDutyMG996R(GRIPPER_OPEN_ANGLE));
+    setZAxisServo(Z_IDLE_ANGLE);
+    setBaseServo(BASE_IDLE_ANGLE);
+    setElbowServo(ELBOW_IDLE_ANGLE);
+    openGripper();
 }
 
 void Claw::openGripper() {
-    gripper = GRIPPER_OPEN_ANGLE;
-    ledcWrite(GRIPPER_SERVO_CHANNEL, angleToDutyMG996R(GRIPPER_OPEN_ANGLE));
+    gripperAngle = GRIPPER_OPEN_ANGLE;
+    ledcWrite(GRIPPER_SERVO_CHANNEL, angleToDutyMG996R(gripperAngle));
 }
 
 void Claw::closeGripper() {
-    gripper = GRIPPER_CLOSE_ANGLE;
-    ledcWrite(GRIPPER_SERVO_CHANNEL, angleToDutyMG996R(GRIPPER_CLOSE_ANGLE));
+    gripperAngle = GRIPPER_CLOSE_ANGLE;
+    ledcWrite(GRIPPER_SERVO_CHANNEL, angleToDutyMG996R(gripperAngle));
 }
 
 void Claw::setZAxisServo(int angle) {
     angle = constrain(angle, Z_MIN_ANGLE, Z_MAX_ANGLE);
-    z = angle;
-    ledcWrite(Z_SERVO_CHANNEL, angleToDutyMG996R(angle));
+    if (angle > zAngle) {
+        for (int i = zAngle; i <= angle; i++) {
+            ledcWrite(Z_SERVO_CHANNEL, angleToDutyZ(i));
+            delay(10);
+        }
+    } else {
+        for (int i = zAngle; i >= angle; i--) {
+            ledcWrite(Z_SERVO_CHANNEL, angleToDutyZ(i));
+            delay(10);
+        }
+    }
+    zAngle = angle;
 }
 
 void Claw::setBaseServo(int angle) {
     angle = constrain(angle, BASE_MIN_ANGLE, BASE_MAX_ANGLE);
-    base = angle;
-    ledcWrite(BASE_SERVO_CHANNEL, angleToDuty25kgcm(angle));
+    baseAngle = angle;
+    ledcWrite(BASE_SERVO_CHANNEL, angleToDutyBase(angle));
 }
 
 void Claw::setElbowServo(int angle) {
     angle = constrain(angle, ELBOW_MIN_ANGLE, ELBOW_MAX_ANGLE);
-    elbow = angle;
-    ledcWrite(ELBOW_SERVO_CHANNEL, angleToDuty25kgcm(angle));
+    elbowAngle = angle;
+    ledcWrite(ELBOW_SERVO_CHANNEL, angleToDutyBase(angle));
 }
 
 float Claw::distanceFromOrigin(float x, float y) {
@@ -89,45 +94,91 @@ float Claw::getBaseAngle(float x, float y) {
 
 PolarPoint calculateOffset(PolarPoint scannerPoint) {
     PolarPoint clawPoint;
+    float d = scannerPoint.distance;
+    float t = scannerPoint.angle;
     if (scannerPoint.angle != 90) {
-        clawPoint.angle = degrees(atan2(OFFSET + scannerPoint.distance * sin(radians(scannerPoint.angle)), scannerPoint.distance * cos(radians(scannerPoint.angle))));
+        clawPoint.angle = degrees(atan2(OFFSET + d * sin(radians(t)), d * cos(radians(t))));
     } else {
         clawPoint.angle = 90;
     }
-    clawPoint.distance = sqrt((OFFSET + scannerPoint.distance * sin(radians(scannerPoint.angle))) * (OFFSET + scannerPoint.distance * sin(radians(scannerPoint.angle))) + (scannerPoint.distance * cos(radians(scannerPoint.angle))) * (scannerPoint.distance * cos(radians(scannerPoint.angle)))) - 70;
+    clawPoint.distance = sqrt((OFFSET + d * sin(radians(t))) * (OFFSET + d * sin(radians(t))) + (d * cos(radians(t))) * (d * cos(radians(t))));
     return clawPoint;
 }
 
-void Claw::searchForPet(int angle, int distance) {
-    setZAxisServo(angle);
-    int x = distance;
-    for (int y = 50; y > 0; y -= 5) {
-        int baseAngle = getBaseAngle(x, y);
-        int elbowAngle = getElbowAngle(x, y);
-        if (baseAngle < 0 || elbowAngle < 0) continue;
-        setBaseServo(baseAngle);
-        setElbowServo(elbowAngle);
-    }
-}
+float Claw::readVoltage() { 
+  int sensorValue = analogRead(HALL_PIN); 
+  float voltage = sensorValue * (HALL_VOLTAGE_REF / 4095.0); 
+  return voltage; 
+} 
 
-void Claw::grabPet(int angle, int distance) {
-    int x = distance;
-    int y = 30; // height of pet
-    int elbowAngle = getElbowAngle(x, y);
-    int baseAngle = getBaseAngle(x, y);
-    if (elbowAngle < 0 || baseAngle < 0) return;
-    openGripper();
-    delay(1000);
-    setZAxisServo(angle);
-    delay(1000);
-    setElbowServo(elbowAngle);
-    delay(1000);
-    setBaseServo(baseAngle);
-    delay(1000);
+bool Claw::searchPet(int angle, int distance) { 
+    Serial.println("claw searching at " + String(angle) + " degrees");
     closeGripper();
-    delay(1000);
-    setBaseServo(BASE_IDLE_ANGLE);
-    setElbowServo(ELBOW_IDLE_ANGLE);
-    setZAxisServo(Z_IDLE_ANGLE);
-    delay(1000);
+    setZAxisServo(angle);
+    int step = -2;
+    int zDeg = angle;
+    for (float y = 220; y >= 80; y -= 5) { 
+        float elbowDeg = getElbowAngle(distance, y); 
+        float baseDeg = getBaseAngle(distance, y); 
+        Serial.println("y: " + String(y));
+        Serial.println("elbowDeg: " + String(elbowDeg));
+        Serial.println("baseDeg: " + String(baseDeg));
+        Serial.println("---");
+
+        if (elbowDeg < 0 || baseDeg < 0) continue; 
+
+        setBaseServo(baseDeg); 
+        setElbowServo(elbowDeg); 
+        delay(100);
+
+        while (true) {
+            setZAxisServo(zDeg);
+            zDeg += step;
+            if (zDeg >= angle + 6 || zDeg <= angle - 6) {
+                step = -1 * step;
+                break;
+            }
+            float currentVoltage = readVoltage();
+            if (currentVoltage > MAGNET_THRESHOLD_VOLTAGE) {
+                Serial.println("found magnet");
+                float b = getBaseAngle(distance, y + 50);
+                float e = getElbowAngle(distance, y + 50);
+                setElbowServo(e);
+                delay(500);
+                setBaseServo(b);
+                delay(500);
+                openGripper();
+                delay(500);
+                setZAxisServo(zDeg);
+                delay(500);
+                for (float h = y; h >= y - 100; h -= 10) {
+                    Serial.println("h: " + String(h));
+                    b = getBaseAngle(distance - 70, h);
+                    e = getElbowAngle(distance - 70, h);
+                    Serial.println("b: " + String(b));
+                    Serial.println("e: " + String(e));
+                    Serial.println("---");
+                    setBaseServo(b);
+                    setElbowServo(e);
+                    delay(100);
+                }
+                for (float d = distance - 70; d <= distance + 90; d += 10) {
+                    Serial.println("d: " + String(d));
+                    b = getBaseAngle(d, y - 100);
+                    e = getElbowAngle(d, y - 100);
+                    Serial.println("b: " + String(b));
+                    Serial.println("e: " + String(e));
+                    Serial.println("---");
+                    setBaseServo(b);
+                    setElbowServo(e);
+                    delay(100);
+                }
+                closeGripper();
+                delay(1000);
+                return true; 
+            } 
+        }
+    } 
+
+    return false; 
 }

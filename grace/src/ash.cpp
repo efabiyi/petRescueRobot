@@ -2,11 +2,11 @@
 // #include "driver/ledc.h" 
 // #include <ESP32Servo.h> 
 
-// #define CLAW_PIN 25 
-// #define Y_PIN 27 
-// #define X_PIN 33 
-// #define Z_PIN 14 
-// #define HALL_PIN 15 
+// #define CLAW_PIN 21
+// #define Y_PIN 20
+// #define X_PIN 25 
+// #define Z_PIN 10
+// #define HALL_PIN 32 
 
 // #define CLAW_CHAN 0 
 // #define Y_CHAN 1 
@@ -22,27 +22,21 @@
 // #define _25KGCM_MIN_US 750 
 // #define _25KGCM_MAX_US 2250 
 
-// #define LINK1 5 
+// #define LINK1 8 
 // #define LINK2 13 
 
-// const float HALL_VOLTAGE_REF = 4.5; 
-// const float MAGNET_THRESHOLD_VOLTAGE = 2.25; 
+// const float HALL_VOLTAGE_REF = 3.3; 
+// const float MAGNET_THRESHOLD_VOLTAGE = 1; 
 
 // const int CLAW_OPEN_ANGLE = 0; 
 // const int CLAW_CLOSE_ANGLE = 110; 
 
-// const int Z_MIN_ANGLE = 0; 
-// const int Z_MAX_ANGLE = 180; 
 // const int Z_STEP_SEARCH_ANGLE = 2; 
 // const int Z_IDLE_ANGLE = 90; 
 
-// const int Y_MIN_SEARCH_ANGLE = 30; 
-// const int Y_MAX_SEARCH_ANGLE = 110; 
 // const int Y_STEP_SEARCH = 5; 
 // const int Y_IDLE_ANGLE = 110; 
 
-// const int X_MIN_SEARCH_ANGLE = 90; 
-// const int X_MAX_SEARCH_ANGLE = 140; 
 // const int X_STEP_SEARCH = 5; 
 // const int X_IDLE_ANGLE = 90; 
 
@@ -80,7 +74,7 @@
 // void moveToHome(); 
 // bool searchPet(); 
 // float distanceFromOrigin(float x, float y); 
-// float getBaseAngle(float x, float y); 
+// float getShoulderAngle(float x, float y); 
 // float getElbowAngle(float x, float y); 
 
 // void setup() { 
@@ -103,7 +97,7 @@
 
 //   moveToHome(); 
 
-//   delay(5000); 
+//   delay(2000); 
 
 //   Serial.println("Robot Arm at home potion. Ready to detect magnets."); 
 // } 
@@ -114,21 +108,28 @@
 
 //   if(petFound) { 
 //     ledcWrite(X_CHAN, GET_DUTY_25KGCM(90)); 
-//     delay(2000); 
+//     delay(500); 
 //     ledcWrite(Y_CHAN, GET_DUTY_25KGCM(90)); 
-//     delay(2000); 
-//     ledcWrite(Z_CHAN, GET_DUTY_MG996R(180));
-//     delay(2000);
+//     delay(500); 
+//     ledcWrite(Z_CHAN, GET_DUTY_MG996R(90));
+//     delay(500);
+//     // ledcWrite(Z_CHAN, GET_DUTY_MG996R(180));
+//     // delay(2000);
 //     ledcWrite(CLAW_CHAN, GET_DUTY_MG996R(CLAW_OPEN_ANGLE)); 
-//     delay(2000); 
+//     delay(500); 
 
 //     moveToHome(); 
-//   } 
+//   }
+
+//   moveToHome();
    
+
+//   int rawSensorValue = analogRead(HALL_PIN); // Read raw ADC value
+
 //   float hallVoltage = readVoltage(HALL_PIN); 
 //   bool petLocated = magnetDetected(hallVoltage); 
    
-//   String hallData = "Z_Angle: " + String(CURRENT_Z_ANGLE) + " | Hall Sensor Voltage: " + String(hallVoltage, 3) + " V, Pet Located: " + (petLocated ? "Yes" : "No"); 
+//   String hallData = "Raw ADC: " + String(rawSensorValue) + " Z_Angle: " + String(CURRENT_Z_ANGLE) + " | Hall Sensor Voltage: " + String(hallVoltage, 3) + " V, Pet Located: " + (petLocated ? "Yes" : "No"); 
 //   Serial.println(hallData); 
 // } 
 
@@ -139,7 +140,7 @@
 // } 
 
 // bool magnetDetected(float voltage) { 
-//   if (voltage < MAGNET_THRESHOLD_VOLTAGE) { 
+//   if (voltage > MAGNET_THRESHOLD_VOLTAGE) { 
 //     return true; 
 //   } 
 //   return false; 
@@ -147,12 +148,12 @@
 
 // void moveToHome() { 
 //   Serial.println("Moving arm to home position..."); 
-//   ledcWrite(CLAW_CHAN, GET_DUTY_MG996R(CLAW_OPEN_ANGLE)); 
+//   ledcWrite(CLAW_CHAN, GET_DUTY_MG996R(CLAW_CLOSE_ANGLE)); 
 //   ledcWrite(X_CHAN, GET_DUTY_25KGCM(X_IDLE_ANGLE)); 
 //   ledcWrite(Y_CHAN, GET_DUTY_25KGCM(Y_IDLE_ANGLE)); 
 //   ledcWrite(Z_CHAN, GET_DUTY_MG996R(Z_IDLE_ANGLE)); 
 
-//   CLAW_IS_OPEN = true; 
+//   CLAW_IS_OPEN = false; 
 //   CURRENT_X_ANGLE = X_IDLE_ANGLE; 
 //   CURRENT_Y_ANGLE = Y_IDLE_ANGLE; 
 //   CURRENT_Z_ANGLE = Z_IDLE_ANGLE; 
@@ -165,7 +166,7 @@
 //   return degrees(acos(((LINK1 * LINK1) + (LINK2 * LINK2) - d * d) / (2 * LINK1 * LINK2))); 
 // } 
 
-// float getBaseAngle(float x, float y) { 
+// float getShoulderAngle(float x, float y) { 
 //   float d = distanceFromOrigin(x, y); 
 //   if (d > LINK1 + LINK2) return -1; 
    
@@ -183,15 +184,15 @@
 
 // bool searchPet() { 
 //   bool petFound = false; 
-//   float minVoltage = HALL_VOLTAGE_REF; 
+//   float maxVoltage = HALL_VOLTAGE_REF; 
 
-//   ledcWrite(Z_CHAN, GET_DUTY_MG996R(Z_DEGREE - 10)); 
+//   float Z_OFFSET =  Z_DEGREE;
+
+//   ledcWrite(Z_CHAN, GET_DUTY_MG996R(Z_OFFSET)); 
 
 //   for (float y = 10; y >= 0; y -= 0.5) { 
-//     float d = distanceFromOrigin(DISTANCE, y); 
-
 //     float elbowDeg = getElbowAngle(DISTANCE, y); 
-//     float shoulderDeg = getBaseAngle(DISTANCE, y); 
+//     float shoulderDeg = getShoulderAngle(DISTANCE, y); 
 
 //     if (elbowDeg < 0 || shoulderDeg < 0) continue; 
 
@@ -218,8 +219,8 @@
 //     Serial.print(" Voltage: "); 
 //     Serial.println(currentVoltage); 
 
-//     if (currentVoltage < minVoltage) { 
-//       minVoltage = currentVoltage; 
+//     if (currentVoltage < maxVoltage) { 
+//       maxVoltage = currentVoltage; 
 //       BEST_X_ANGLE = shoulderServoAngle; 
 //       BEST_Y_ANGLE = elbowServoAngle; 
 //     } 
@@ -228,24 +229,26 @@
 //       Serial.println("Pet Detected!"); 
 //       ledcWrite(Y_CHAN, GET_DUTY_25KGCM(Y_IDLE_ANGLE)); 
 //       delay(500); 
-//       ledcWrite(Z_CHAN, GET_DUTY_MG996R(Z_DEGREE)); 
+//       ledcWrite(Z_CHAN, GET_DUTY_MG996R(Z_OFFSET)); 
 //       delay(500); 
-//       ledcWrite(Y_CHAN, GET_DUTY_25KGCM(elbowServoAngle)); 
+//       ledcWrite(CLAW_CHAN, GET_DUTY_MG996R(CLAW_OPEN_ANGLE)); 
+//       delay(500);
+//       ledcWrite(Y_CHAN, GET_DUTY_25KGCM(elbowServoAngle + 5)); 
 //       delay(500); 
-//       ledcWrite(X_CHAN,GET_DUTY_25KGCM(shoulderServoAngle - 10)); 
+//       ledcWrite(X_CHAN,GET_DUTY_25KGCM(shoulderServoAngle - 15)); 
 //       ledcWrite(CLAW_CHAN, GET_DUTY_MG996R(CLAW_CLOSE_ANGLE)); 
-//       delay(1000); 
+//       delay(500); 
 //       CLAW_IS_OPEN = false; 
 //       return true; 
 //     } 
 //   } 
 
-//   if (minVoltage < HALL_VOLTAGE_REF) { 
+//   if (maxVoltage > HALL_VOLTAGE_REF) { 
 //     ledcWrite(X_CHAN, GET_DUTY_25KGCM(BEST_X_ANGLE)); 
 //     delay(300); 
 //     ledcWrite(Y_CHAN, GET_DUTY_25KGCM(BEST_Y_ANGLE)); 
 //     delay(300); 
-//     return (minVoltage < MAGNET_THRESHOLD_VOLTAGE); 
+//     return (maxVoltage > MAGNET_THRESHOLD_VOLTAGE); 
 //   } 
 
 //   return false; 

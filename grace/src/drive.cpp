@@ -5,14 +5,13 @@
 #include "pins.h"
 
 const int MIN_SPEED = 500;
-const int MAX_SPEED = 2000;
-const float KP = 0.5f;
+const int MAX_SPEED = 1600;
+const float KP = 3.0f;
 const float KD = 0.0f;
 
 float lastError = 0.0;
 float lastOnLineError = 0.0;
 unsigned long lastTime = 0;
-unsigned long lastWriteTime = 0;
 
 void initializeDrive() {
   ledcSetup(FWD_LEFT_CHAN, 200, 12);
@@ -29,7 +28,6 @@ void initializeDrive() {
   pinMode(RIGHT_SENSOR, INPUT);
 
   lastTime = millis();
-  lastWriteTime = millis();
 }
 
 void leftDrive(int speed) {
@@ -79,7 +77,7 @@ void lineFollow(int baseSpeed, int threshold) {
   debugPrint(" - Right: ");
   debugPrint(String(rightReading));
 
-  bool offLine = leftReading <= threshold && rightReading <= threshold;
+  bool offLine = (leftReading <= threshold) && (rightReading <= threshold);
 
   float error;
   float derivative;
@@ -92,9 +90,16 @@ void lineFollow(int baseSpeed, int threshold) {
     float deltaTime = (now - lastTime) / 1000.0;
     lastTime = now;
 
-    error = (leftReading - rightReading) / (leftReading + rightReading + 0.001);
+    error = 10.0 * ((leftReading - rightReading) / (leftReading + rightReading + 0.001)) * (1 / sqrt(leftReading + rightReading + 0.001));
     derivative = (error - lastError) / deltaTime;
     correction = (KP * error) + (KD * derivative);
+
+    // if (derivative > 5) {
+    //   leftDrive(baseSpeed);
+    //   rightDrive(baseSpeed);
+    //   delay(1000);
+    //   return;
+    // }
 
     debugPrint(" - ONLINE");
     debugPrint(" - Error: ");
@@ -117,14 +122,11 @@ void lineFollow(int baseSpeed, int threshold) {
     debugPrint(String(correction));
   }
 
-  // if ((millis() - lastWriteTime) >= 50) {
-    leftSpeed = baseSpeed - (correction * baseSpeed/2);
-    rightSpeed = baseSpeed + (correction * baseSpeed/2);
-    leftDrive(leftSpeed);
-    rightDrive(rightSpeed);
-  //   lastWriteTime = millis();
-  // }
-
+  leftSpeed = baseSpeed - (correction * baseSpeed/2);
+  rightSpeed = baseSpeed + (correction * baseSpeed/2);
+  leftDrive(leftSpeed);
+  rightDrive(rightSpeed);
+  
   debugPrintln("");
   
   lastError = error;
