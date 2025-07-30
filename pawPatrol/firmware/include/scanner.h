@@ -7,44 +7,40 @@
 #include "constants.h"
 #include "logger.h"
 
-struct PolarPoint
-{
-    int distance;
-    int angle;
-};
+#include <Adafruit_VL53L0X.h>
+#include "utils.h"
 
-struct CartesianPoint
-{
-    int x;
-    int y;
-};
+class Scanner {
+private:
+    Logger& logger;
+    static constexpr int SCAN_DATA_SIZE = 13;
+    static constexpr int SERVO_STEP_SIZE = 10;
+    static constexpr int MAX_ANGLE = 150;
+    static constexpr int MIN_ANGLE = 30;
+    static constexpr int MAX_DISTANCE = 9999;
+    static constexpr int IN_RANGE_DISTANCE = 300;
+    
+    Adafruit_VL53L0X lox;
+    PolarPoint scanData[SCAN_DATA_SIZE];
+    int servoStep = SERVO_STEP_SIZE;
+    int servoAngle = 90;
+    
+public:  
+    int readDistance();
+    void clearScanData();
+    void setServoAngle(int angle);
 
-class Scanner
-    {
-    private:
-
-        Logger& logger;
-        Adafruit_VL53L0X lox;
-        PolarPoint scanData[SCAN_DATA_SIZE];
-        int servoStep = SERVO_STEP_SIZE;
-        int servoAngle = 90;
-
-    public:
-        Scanner(Logger& logger);
-        int angleToDutyCycle(int angle);
-        int angleToIndex(int angle);
-        void saveScanData(int angle, int distance);
-        int readDistance();
-        void clearScanData();
-        void setServoAngle(int angle);
-
-        bool initialize();
-        int getServoAngle() { return servoAngle; }
-        PolarPoint getClosestObject();
-        void scanOneStep();
-        bool completedScan();
-        void printScanData();
-        bool closestObjectIsWall();
+    Scanner(Logger& logger);
+    bool initialize();
+    void reset();
+    int getServoAngle() { return servoAngle; }
+    PolarPoint getClosestObject();
+    void scanOneStep(int scanDelay);
+    bool completedScan();
+    void printScanData();
+    bool closestObjectIsWall();
+    PolarPoint honeIn(int angle);
 };
 
 #endif
+

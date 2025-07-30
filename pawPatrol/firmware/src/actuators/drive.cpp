@@ -1,35 +1,24 @@
 #include <Arduino.h>
 #include "driver/ledc.h"
 #include "drive.h"
+#include "utils.h"
 #include "constants.h"
-#include "logger.h"
 
-// Global variables
+const int MIN_SPEED = 500;
+const int MAX_SPEED = 2000;
+const float KP = 0.5f;
+const float KD = 0.0f;
+
 float lastError = 0.0;
+float lastOnLineError = 0.0;
 unsigned long lastTime = 0;
-float lastCorrection = 0.0;
-bool offLine = false;
+unsigned long lastWriteTime = 0;
 
-int offLineCounter = OFF_LINE_THRESHOLD;
-
-Drive::Drive(Logger& logger) : logger(logger) {
-    // Any other initialization if needed
-}
-
-void debugPrint(const String &message) {
-  // Serial.print(message);     // Comment out to improve performance
-}
-
-void debugPrintln(const String &message) {
-  debugPrint(message);
-  Serial.println();
-}
-
-void Drive::initializeDrive() {
-  ledcSetup(FWD_LEFT_CHAN, 250, 12);
-  ledcSetup(BWD_LEFT_CHAN, 250, 12);
-  ledcSetup(FWD_RIGHT_CHAN, 250, 12);
-  ledcSetup(BWD_RIGHT_CHAN, 250, 12);
+void initializeDrive() {
+  ledcSetup(FWD_LEFT_CHAN, 200, 12);
+  ledcSetup(BWD_LEFT_CHAN, 200, 12);
+  ledcSetup(FWD_RIGHT_CHAN, 200, 12);
+  ledcSetup(BWD_RIGHT_CHAN, 200, 12);
 
   ledcAttachPin(FWD_LEFT_PWM, FWD_LEFT_CHAN);
   ledcAttachPin(BWD_LEFT_PWM, BWD_LEFT_CHAN);
@@ -40,115 +29,110 @@ void Drive::initializeDrive() {
   pinMode(RIGHT_SENSOR, INPUT);
 
   lastTime = millis();
+  lastWriteTime = millis();
 }
 
-void leftDriveForward(int speed) {
-  speed = constrain(speed, MIN_SPEED, MAX_SPEED);
-  ledcWrite(BWD_LEFT_CHAN, 0);
-  ledcWrite(FWD_LEFT_CHAN, speed);
-} 
+void leftDrive(int speed) {
+  debugPrint(" - L speed: ");
+  if (speed > MIN_SPEED) {
+    speed = min(speed, MAX_SPEED);
+    ledcWrite(FWD_LEFT_CHAN, speed);
+    ledcWrite(BWD_LEFT_CHAN, 0);
+  } else {
+    speed = MIN_SPEED - speed;
+    speed = min(MIN_SPEED + speed, MAX_SPEED);
+    ledcWrite(FWD_LEFT_CHAN, 0);
+    ledcWrite(BWD_LEFT_CHAN, speed);  
+    debugPrint("-");
+  }
+  debugPrint(String(speed));
+}
 
-void leftDriveBackward(int speed) {
-  speed = constrain(speed, MIN_SPEED, MAX_SPEED);
+void rightDrive(int speed) {
+  debugPrint(" - R speed: ");
+  if (speed > MIN_SPEED) {
+    speed = min(speed, MAX_SPEED);
+    ledcWrite(FWD_RIGHT_CHAN, speed);
+    ledcWrite(BWD_RIGHT_CHAN, 0);
+  } else {
+    speed = MIN_SPEED - speed;
+    speed = min(MIN_SPEED + speed, MAX_SPEED);
+    ledcWrite(FWD_RIGHT_CHAN, 0);
+    ledcWrite(BWD_RIGHT_CHAN, speed);  
+    debugPrint("-");
+  }
+  debugPrint(String(speed));
+}
+
+void stopMotors() {
   ledcWrite(FWD_LEFT_CHAN, 0);
-  ledcWrite(BWD_LEFT_CHAN, speed);  
-}
-
-void rightDriveForward(int speed) {
-  speed = constrain(speed, MIN_SPEED, MAX_SPEED);
-  ledcWrite(BWD_RIGHT_CHAN, 0);
-  ledcWrite(FWD_RIGHT_CHAN, speed);
-}
-
-void rightDriveBackward(int speed) {
-  speed = constrain(speed, MIN_SPEED, MAX_SPEED);
+  ledcWrite(BWD_LEFT_CHAN, 0);
   ledcWrite(FWD_RIGHT_CHAN, 0);
-  ledcWrite(BWD_RIGHT_CHAN, speed);  
+  ledcWrite(BWD_RIGHT_CHAN, 0);  
 }
 
-float calculateError(int l, int r) {
-  return (l * -1.0 + r * 1.0) / (l + r + 0.001);
-}
-
-bool isOffLine(int l, int r) {
-  return (l < THRESHOLD && r < THRESHOLD);
-}
-
-void Drive::drive() {
-  unsigned long now = millis();
-  float deltaTime = (now - lastTime) / 1000.0;
-  lastTime = now;
-
+void lineFollow(int baseSpeed, int threshold, Logger& logger) {
   int leftReading = analogRead(LEFT_SENSOR);
   int rightReading = analogRead(RIGHT_SENSOR);
   debugPrint("Left: ");
   debugPrint(String(leftReading));
   debugPrint(" - Right: ");
   debugPrint(String(rightReading));
-  bool offLine = isOffLine(leftReading, rightReading);
-  String pidData = "";
 
-  if (offLine) {
-    debugPrint(" - OFF LINE");
-    int speed = BASE_SPEED * 1.2;
-    if (lastCorrection > 0) {
-      leftDriveBackward(speed);
-      rightDriveForward(speed);
-      debugPrint(" - L BACKWARD: ");
-      debugPrint(String(speed));
-      debugPrint(" - R FORWARD: ");
-      debugPrintln(String(speed));
-      pidData = "PID Data: Last Correction: " + String(lastCorrection) + ", Left Backward: " + String(speed) + ", Right Forward: " + String(speed);
-    } else {
-      leftDriveForward(speed);
-      rightDriveBackward(speed);
-      debugPrint(" - L FORWARD: ");
-      debugPrint(String(speed));
-      debugPrint(" - R BACKWARD: ");
-      debugPrintln(String(speed));
-      pidData = "PID Data: Last Correction: " + String(lastCorrection) + ", Left Forward: " + String(speed) + ", Right Backward: " + String(speed);
-    }
-  } else { // If on line, calculate error and correction
-    float error = calculateError(leftReading, rightReading);
-    float derivative = (error - lastError) / deltaTime;
-    float correction = (KP * error) + (KD * derivative);
+  bool offLine = leftReading <= threshold && rightReading <= threshold;
 
-    int leftSpeed = BASE_SPEED - (correction * BASE_SPEED/2);
-    int rightSpeed = BASE_SPEED + (correction * BASE_SPEED/2);
-  
-    leftDriveForward(leftSpeed);
-    rightDriveForward(rightSpeed);
-    
-    lastError = error;
-    lastCorrection = correction;
+  float error;
+  float derivative;
+  float correction;
+  int leftSpeed;
+  int rightSpeed;
 
-    debugPrint(" - ON LINE");
+  if (!offLine) {
+    unsigned long now = millis();
+    float deltaTime = (now - lastTime) / 1000.0;
+    lastTime = now;
+
+    error = (leftReading - rightReading) / (leftReading + rightReading + 0.001);
+    derivative = (error - lastError) / deltaTime;
+    correction = (KP * error) + (KD * derivative);
+
+    debugPrint(" - ONLINE");
     debugPrint(" - Error: ");
     debugPrint(String(error));
     debugPrint(" - Derivative: ");
     debugPrint(String(derivative));
-
     debugPrint(" - Correction: ");
     debugPrint(String(correction));
-    debugPrint(" - L speed: ");
-    debugPrint(String(constrain(leftSpeed, MIN_SPEED, MAX_SPEED)));
-    debugPrint(" - R speed: ");
-    debugPrintln(String(constrain(rightSpeed, MIN_SPEED, MAX_SPEED)));
-    pidData = "PID Data: Error: " + String(error) + ", Derivative: " + String(derivative) + ", Correction: " + String(correction) + ", Left Speed: " + String(leftSpeed) + ", Right Speed: " + String(rightSpeed);
+    
+
+    lastOnLineError = error;
+  } else {
+    error = 20 * lastOnLineError;
+    correction = KP * error;
+
+    debugPrint(" - OFFLINE");
+    debugPrint(" - Error: ");
+    debugPrint(String(error));
+    debugPrint(" - Derivative: N/A");
+    debugPrint(" - Correction: ");
+    debugPrint(String(correction));
   }
-  String driveData = "[Drive] Reflectance Data: Left:" + String(leftReading) + " - Right: " + String(rightReading) + " - Off Line: " + (offLine ? "Yes" : "No");
-  logger.log(driveData + " | " + pidData);
+
+  // if ((millis() - lastWriteTime) >= 50) {
+    leftSpeed = baseSpeed - (correction * baseSpeed/2);
+    rightSpeed = baseSpeed + (correction * baseSpeed/2);
+    leftDrive(leftSpeed);
+    rightDrive(rightSpeed);
+  //   lastWriteTime = millis();
+  // }
+
+  String reflectanceData = "[Drive] Drive Data: Off Line: " + String(offLine ? "Yes" : "No");
+  
+  logger.log(reflectanceData);
   delay(10);
 }
 
 void testDrive(int leftSpeed, int rightSpeed) {
-  leftDriveForward(leftSpeed);
-  rightDriveForward(rightSpeed);
-  delay(10);
-}
-
-void testDriveBwd(int leftSpeed, int rightSpeed) {
-  leftDriveBackward(leftSpeed);
-  rightDriveBackward(rightSpeed);
-  delay(10);
+  leftDrive(leftSpeed);
+  rightDrive(rightSpeed);
 }

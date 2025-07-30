@@ -1,0 +1,100 @@
+[Drive] Reflectance Data: Left:994 - Right: 1391 - Off Line: No | PID Data: Error: 0.17, Derivative: 27.28, Correction: 0.13, Left Speed: 933, Right Speed: 1066
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:995 - Right: 221 - Off Line: No | PID Data: Error: -0.64, Derivative: -14.14, Correction: -0.51, Left Speed: 1254, Right Speed: 745
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:1058 - Right: 158 - Off Line: No | PID Data: Error: -0.74, Derivative: -4.87, Correction: -0.59, Left Speed: 1296, Right Speed: 703
+[Drive] Reflectance Data: Left:400 - Right: 146 - Off Line: No | PID Data: Error: -0.47, Derivative: -26.44, Correction: -0.37, Left Speed: 1186, Right Speed: 813
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:1411 - Right: 0 - Off Line: No | PID Data: Error: -1.00, Derivative: -51.79, Correction: -0.80, Left Speed: 1399, Right Speed: 600
+[Drive] Reflectance Data: Left:705 - Right: 0 - Off Line: No | PID Data: Error: -1.00, Derivative: 0.00, Correction: -0.80, Left Speed: 1399, Right Speed: 600
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:785 - Right: 395 - Off Line: No | PID Data: Error: -0.33, Derivative: 55.79, Correction: -0.26, Left Speed: 1132, Right Speed: 867
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Hall] Voltage: 3749.00 V, Magnet: No
+[Drive] Reflectance Data: Left:651 - Right: 0 - Off Line: No | PID Data: Error: -1.00, Derivative: -64.84, Correction: -0.80, Left Speed: 1399, Right Speed: 600
+[Hall] Voltage: 3391.00 V, Magnet: No
+[Drive] Reflectance Data: Left:1015 - Right: 0 - Off Line: No | PID Data: Error: -1.00, Derivative: 0.00, Correction: -0.80, Left Speed: 1399, Right Speed: 600
+[Drive] Reflectance Data: Left:1393 - Right: 737 - Off Line: No | PID Data: Error: -0.31, Derivative: 47.13, Correction: -0.25, Left Speed: 1123, Right Speed: 876
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:1108 - Right: 23 - Off Line: No | PID Data: Error: -0.96, Derivative: 3.39, Correction: -0.77, Left Speed: 1383, Right Speed: 616
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:1158 - Right: 0 - Off Line: No | PID Data: Error: -1.00, Derivative: -0.00, Correction: -0.80, Left Speed: 1399, Right Speed: 600
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:1392 - Right: 0 - Off Line: No | PID Data: Error: -1.00, Derivative: 0.00, Correction: -0.80, Left Speed: 1399, Right Speed: 600
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:1298 - Right: 0 - Off Line: No | PID Data: Error: -1.00, Derivative: -29.50, Correction: -0.80, Left Speed: 1399, Right Speed: 600
+[Drive] Reflectance Data: Left:1301 - Right: 0 - Off Line: No | PID Data: Error: -1.00, Derivative: 0.00, Correction: -0.80, Left Speed: 1399, Right Speed: 600
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:1413 - Right: 0 - Off Line: No | PID Data: Error: -1.00, Derivative: 0.00, Correction: -0.80, Left Speed: 1399, Right Speed: 600
+[Drive] Reflectance Data: Left:1443 - Right: 0 - Off Line: No | PID Data: Error: -1.00, Derivative: 0.00, Correction: -0.80, Left Speed: 1399, Right Speed: 600
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Hall] Voltage: 3463.00 V, Magnet: No
+[Drive] Reflectance Data: Left:1593 - Right: 0 - Off Line: No | PID Data: Error: -1.00, Derivative: 0.00, Correction: -0.80, Left Speed: 1399, Right Speed: 600
+[Drive] Reflectance Data: Left:1671 - Right: 0 - Off Line: No | PID Data: Error: -1.00, Derivative: 0.00, Correction: -0.80, Left Speed: 1399, Right Speed: 600
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:1555 - Right: 0 - Off Line: No | PID Data: Error: -1.00, Derivative: 0.00, Correction: -0.80, Left Speed: 1399, Right Speed: 600
+[Drive] Reflectance Data: Left:1595 - Right: 0 - Off Line: No | PID Data: Error: -1.00, Derivative: 0.00, Correction: -0.80, Left Speed: 1399, Right Speed: 600
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:1434 - Right: 0 - Off Line: No | PID Data: Error: -1.00, Derivative: 0.00, Correction: -0.80, Left Speed: 1399, Right Speed: 600
+[Drive] Reflectance Data: Left:1595 - Right: 0 - Off Line: No | PID Data: Error: -1.00, Derivative: -10.20, Correction: -0.80, Left Speed: 1399, Right Speed: 600
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:1553 - Right: 0 - Off Line: No | PID Data: Error: -1.00, Derivative: -0.00, Correction: -0.80, Left Speed: 1399, Right Speed: 600
+[Drive] Reflectance Data: Left:1579 - Right: 0 - Off Line: No | PID Data: Error: -1.00, Derivative: -0.00, Correction: -0.80, Left Speed: 1399, Right Speed: 600
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:1593 - Right: 0 - Off Line: No | PID Data: Error: -1.00, Derivative: -0.00, Correction: -0.80, Left Speed: 1399, Right Speed: 600
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:1553 - Right: 0 - Off Line: No | PID Data: Error: -1.00, Derivative: -0.00, Correction: -0.80, Left Speed: 1399, Right Speed: 600
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:1712 - Right: 137 - Off Line: No | PID Data: Error: -0.85, Derivative: 12.35, Correction: -0.68, Left Speed: 1340, Right Speed: 659
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:713 - Right: 0 - Off Line: No | PID Data: Error: -1.00, Derivative: 0.00, Correction: -0.80, Left Speed: 1399, Right Speed: 600
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:1519 - Right: 0 - Off Line: No | PID Data: Error: -1.00, Derivative: -0.00, Correction: -0.80, Left Speed: 1399, Right Speed: 600
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:1381 - Right: 0 - Off Line: No | PID Data: Error: -1.00, Derivative: -0.00, Correction: -0.80, Left Speed: 1399, Right Speed: 600
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:1194 - Right: 0 - Off Line: No | PID Data: Error: -1.00, Derivative: -0.00, Correction: -0.80, Left Speed: 1399, Right Speed: 600
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:1407 - Right: 0 - Off Line: No | PID Data: Error: -1.00, Derivative: -0.00, Correction: -0.80, Left Speed: 1399, Right Speed: 600
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:202 - Right: 0 - Off Line: No | PID Data: Error: -1.00, Derivative: 0.00, Correction: -0.80, Left Speed: 1399, Right Speed: 600
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:640 - Right: 0 - Off Line: No | PID Data: Error: -1.00, Derivative: -0.00, Correction: -0.80, Left Speed: 1399, Right Speed: 600
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:374 - Right: 0 - Off Line: No | PID Data: Error: -1.00, Derivative: -0.00, Correction: -0.80, Left Speed: 1399, Right Speed: 600
+[Drive] Reflectance Data: Left:842 - Right: 0 - Off Line: No | PID Data: Error: -1.00, Derivative: -0.00, Correction: -0.80, Left Speed: 1399, Right Speed: 600
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:1221 - Right: 51 - Off Line: No | PID Data: Error: -0.92, Derivative: 7.29, Correction: -0.74, Left Speed: 1367, Right Speed: 632
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:285 - Right: 0 - Off Line: No | PID Data: Error: -1.00, Derivative: 0.00, Correction: -0.80, Left Speed: 1399, Right Speed: 600
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:126 - Right: 0 - Off Line: Yes | PID Data: Last Correction: -0.80, Left Forward: 1200, Right Backward: 1200
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:0 - Right: 0 - Off Line: Yes | PID Data: Last Correction: -0.26, Left Forward: 1200, Right Backward: 1200
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:800 - Right: 112 - Off Line: No | PID Data: Error: -0.75, Derivative: -0.81, Correction: -0.60, Left Speed: 1301, Right Speed: 698
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:0 - Right: 0 - Off Line: Yes | PID Data: Last Correction: -0.80, Left Forward: 1200, Right Backward: 1200
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:0 - Right: 0 - Off Line: Yes | PID Data: Last Correction: -0.17, Left Forward: 1200, Right Backward: 1200
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:0 - Right: 0 - Off Line: Yes | PID Data: Last Correction: -0.39, Left Forward: 1200, Right Backward: 1200
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:0 - Right: 0 - Off Line: Yes | PID Data: Last Correction: -0.18, Left Forward: 1200, Right Backward: 1200
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:826 - Right: 450 - Off Line: No | PID Data: Error: -0.29, Derivative: -17.53, Correction: -0.24, Left Speed: 1117, Right Speed: 882
+[Hall] Voltage: 3504.00 V, Magnet: No
+[Drive] Reflectance Data: Left:0 - Right: 0 - Off Line: Yes | PID Data: Last Correction: 0.48, Left Backward: 1200, Right Forward: 1200
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:0 - Right: 0 - Off Line: Yes | PID Data: Last Correction: 0.01, Left Backward: 1200, Right Forward: 1200
+[Hall] Voltage: 4095.00 V, Magnet: No
+[Drive] Reflectance Data: Left:0 - Right: 0 - Off Line: Yes | PID Data: Last Correction: 0.20, Left Backward: 1200, Right Forward: 1200
+[Hall] Voltage: 4095.00 V, Magnet: No

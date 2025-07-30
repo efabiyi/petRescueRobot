@@ -4,13 +4,13 @@
 #include "logger.h"
 
 HallSensor::HallSensor(Logger& logger) : logger(logger) {
-  pinMode(HALL_SENSOR_PIN, INPUT);
+  pinMode(HALL_PIN, INPUT);
   analogReadResolution(12); // Set ADC resolution to 12 bits
 }
 
 float HallSensor::readVoltage()
 {
-  int sensorValue = analogRead(HALL_SENSOR_PIN);
+  int sensorValue = analogRead(HALL_PIN);
   float voltage = sensorValue * (HALL_VOLTAGE_REF / 4095.0); // Convert ADC value to voltage
   return voltage;
 }

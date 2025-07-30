@@ -14,8 +14,8 @@ void  WifiManager::startWifi() {
   Serial.print("Connecting to WiFi");
 
   int attempts = 0;
-  while (WiFi.status() != WL_CONNECTED && attempts < 20) {
-    delay(500);
+  while (WiFi.status() != WL_CONNECTED && attempts < 10) {
+    delay(100);
     Serial.print(".");
     attempts++;
 

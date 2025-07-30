@@ -6,7 +6,7 @@
 QueueHandle_t Logger::logQueue;
 
 void Logger::begin() {
-  logQueue = xQueueCreate(2, sizeof(String*));
+  logQueue = xQueueCreate(3, sizeof(String*));
   Serial.print("reached");
   xTaskCreatePinnedToCore(
     loggingTask,

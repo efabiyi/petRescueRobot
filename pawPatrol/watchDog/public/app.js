@@ -20,6 +20,18 @@ async function fetchLogs() {
     const sensor = match[1].toLowerCase();
     const message = match[2].replace(/\s*\|\s*/g, '\n');
 
+    // Check for special messages
+    if (sensor === "state") {
+      document.getElementById("robotState").textContent = message;
+      return;
+    }
+
+    if (sensor === "petcount") {
+      document.getElementById("petCount").textContent = message;
+      return;
+    }
+
+    // Sensor log handling
     if (logDisplays[sensor]) {
       logs[sensor].push(message);
       if (logs[sensor].length > 25) logs[sensor].shift();
@@ -28,9 +40,12 @@ async function fetchLogs() {
     }
   };
 
+
   eventSource.onerror = (err) => {
     console.error("❌ Stream error:", err);
   };
 }
 
 fetchLogs();
+
+
