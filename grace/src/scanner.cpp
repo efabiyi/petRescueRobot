@@ -76,7 +76,7 @@ PolarPoint Scanner::honeIn(int angle) {
     if (angle < 0) return obj;
     for (int theta = minAngle; theta <= maxAngle; theta += 2) {
         setServoAngle(theta);
-        delay(500);
+        delay(750);
         int distances[10];
         double sum = 0.0;
         for (int i = 0; i < 10; i++) {
@@ -140,28 +140,13 @@ void Scanner::printScanData() {
     }
 }
 
-// bool Scanner::isWall(PolarPoint data[], int size) {
+// bool Scanner::isWall(PolarPoint data[], int size, int targetAngle) {
 //     int threshold = 1000;
-//     int startIndex = -1;
-//     int endIndex = -1;
-//     bool inCluster = false;
-
-//     for (int i = 0; i < size; i++) {
-//         if (!inCluster && data[i].distance < threshold) {
-//             startIndex = i;
-//             inCluster = true;
-//         }
-//         else if (inCluster && data[i].distance >= threshold) {
-//             endIndex = i - 1;
-//             break;
-//         }
-//     }
-
-//     if (inCluster && endIndex == -1) {
-//         endIndex = size - 1;
-//     }
-
-//     CartesianPoint cartesianData[SCAN_DATA_SIZE];
+//     int targetIndex = (targetAngle - MIN_ANGLE) / 5;
+//     int startIndex = targetAngle;
+//     int endIndex = targetAngle;
+//     for (int i = targetAngle; i <= MAX_ANGLE)
+//     CartesianPoint cartesianData[size];
 
 //     for (int i = startIndex; i <= endIndex; i++) {
 //         float radiansVal = radians(scanData[i].angle);
@@ -173,7 +158,7 @@ void Scanner::printScanData() {
 //     int width = cartesianData[endIndex].x - cartesianData[startIndex].x;
 //     // Serial.println("width: " + String(width));
 
-//     float secondDeriv[SCAN_DATA_SIZE - 2];
+//     float secondDeriv[size - 2];
 
 //     for (int i = startIndex + 1; i <= endIndex - 1; i++) {
 //         float prevY = cartesianData[i - 1].y;
@@ -196,10 +181,12 @@ void Scanner::printScanData() {
 
 //         secondDeriv[i] = deriv;
 //         if (deriv > 0.03) {
+//             Serial.println("not wall");
 //             return false;
 //         }
 //         // Serial.println("deriv: " + String(deriv));
 //     }
 
-//     return false;
+//     Serial.println("wall");
+//     return true;
 // }

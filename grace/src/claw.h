@@ -3,7 +3,7 @@
 
 #include "utils.h"
 
-const int OFFSET = 86;
+const int OFFSET = 80;
 
 PolarPoint calculateOffset(PolarPoint scannerPoint);
 

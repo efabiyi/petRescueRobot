@@ -4,9 +4,9 @@
 #include "utils.h"
 #include "pins.h"
 
-const int MIN_SPEED = 500;
+const int MIN_SPEED = 0;
 const int MAX_SPEED = 1600;
-const float KP = 3.0f;
+const float KP = 0.6f;
 const float KD = 0.0f;
 
 float lastError = 0.0;
@@ -90,16 +90,9 @@ void lineFollow(int baseSpeed, int threshold) {
     float deltaTime = (now - lastTime) / 1000.0;
     lastTime = now;
 
-    error = 10.0 * ((leftReading - rightReading) / (leftReading + rightReading + 0.001)) * (1 / sqrt(leftReading + rightReading + 0.001));
+    error = (leftReading - rightReading) / (leftReading + rightReading + 0.001);
     derivative = (error - lastError) / deltaTime;
     correction = (KP * error) + (KD * derivative);
-
-    // if (derivative > 5) {
-    //   leftDrive(baseSpeed);
-    //   rightDrive(baseSpeed);
-    //   delay(1000);
-    //   return;
-    // }
 
     debugPrint(" - ONLINE");
     debugPrint(" - Error: ");
