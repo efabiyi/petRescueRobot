@@ -11,7 +11,6 @@ private:
     static constexpr int MAX_ANGLE = 170;
     static constexpr int MIN_ANGLE = 10;
     static constexpr int MAX_DISTANCE = 9999;
-    static constexpr int IN_RANGE_DISTANCE = 350;
     
     Adafruit_VL53L0X lox;
     PolarPoint scanData[SCAN_DATA_SIZE];
@@ -27,8 +26,8 @@ public:
     bool initialize();
     void reset();
     int getServoAngle() { return servoAngle; }
-    PolarPoint getClosestObject();
-    bool scanOneStep(int scanDelay);
+    PolarPoint getClosestObject(int minAngle = MIN_ANGLE, int maxAngle = MAX_ANGLE);
+    bool scanOneStep(int threshold);
     bool completedScan();
     void printScanData();
     bool isWall(PolarPoint data[], int size);

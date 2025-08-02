@@ -42,6 +42,11 @@ void Claw::closeGripper() {
     ledcWrite(GRIPPER_SERVO_CHANNEL, angleToDutyMG996R(gripperAngle));
 }
 
+void Claw::halfOpenGripper() {
+    gripperAngle = 70;
+    ledcWrite(GRIPPER_SERVO_CHANNEL, angleToDutyMG996R(gripperAngle));
+}
+
 void Claw::setZAxisServo(int angle) {
     angle = constrain(angle, Z_MIN_ANGLE, Z_MAX_ANGLE);
     if (angle > zAngle) {
@@ -67,7 +72,7 @@ void Claw::setBaseServo(int angle) {
 void Claw::setElbowServo(int angle) {
     angle = constrain(angle, ELBOW_MIN_ANGLE, ELBOW_MAX_ANGLE);
     elbowAngle = angle;
-    ledcWrite(ELBOW_SERVO_CHANNEL, angleToDutyBase(angle));
+    ledcWrite(ELBOW_SERVO_CHANNEL, angleToDutyElbow(angle));
 }
 
 float Claw::distanceFromOrigin(float x, float y) {
@@ -116,37 +121,45 @@ float Claw::readVoltage() {
   return voltage; 
 }
 
-bool Claw::searchPet(int angle, int distance) { 
+bool Claw::searchPet(int angle, int distance, int petNumber) { 
     Serial.println("claw searching at " + String(angle) + " degrees");
+    int step = -1;
+    int zDeg = angle;
+    int startY = 120;
+    int zRange = 8;
+    if (petNumber == 3 || petNumber == 4) {
+        setBaseServo(110);
+        delay(500);
+        setElbowServo(150);
+        delay(500);
+        startY = 300;
+    }
     closeGripper();
     setZAxisServo(angle);
-    int step = -2;
-    int zDeg = angle;
-    for (float y = 180; y >= 0; y -= 5) { 
-        // if (millis() >= cutOffTime) return false;
+    for (float y = startY; y >= 0; y -= 5) { 
         float elbowDeg = getElbowAngle(distance, y); 
         float baseDeg = getBaseAngle(distance, y); 
-        Serial.println("y: " + String(y));
-        Serial.println("elbowDeg: " + String(elbowDeg));
-        Serial.println("baseDeg: " + String(baseDeg));
-        Serial.println("---");
+        // Serial.println("y: " + String(y));
+        // Serial.println("elbowDeg: " + String(elbowDeg));
+        // Serial.println("baseDeg: " + String(baseDeg));
+        // Serial.println("---");
 
         if (elbowDeg < 0 || baseDeg < 0) continue; 
 
-        setBaseServo(baseDeg); 
         setElbowServo(elbowDeg); 
-        delay(100);
+        setBaseServo(baseDeg); 
+        delay(200);
 
-        while (true) {
-            setZAxisServo(zDeg);
-            zDeg += step;
-            if (zDeg >= angle + 8 || zDeg <= angle - 8) {
-                step = -1 * step;
-                break;
-            }
+        // while (true) {
+        //     setZAxisServo(zDeg);
+        //     zDeg += step;
+        //     if (zDeg >= angle + zRange || zDeg <= angle - zRange) {
+        //         step = -1 * step;
+        //         break;
+        //     }
             float currentVoltage = readVoltage();
             if (currentVoltage > MAGNET_THRESHOLD_VOLTAGE) {
-                Serial.println("found magnet");
+                // Serial.println("found magnet");
                 float b = getBaseAngle(distance, y + 50);
                 float e = getElbowAngle(distance, y + 50);
                 setElbowServo(e);
@@ -154,20 +167,21 @@ bool Claw::searchPet(int angle, int distance) {
                 setBaseServo(b);
                 delay(500);
                 openGripper();
+                if (petNumber == 4) halfOpenGripper();
                 delay(500);
-                setZAxisServo(zDeg + 5);
+                setZAxisServo(zDeg);
                 delay(500);
-                for (float h = y; h >= y - 100; h -= 10) {
-                    b = getBaseAngle(distance - 50, h);
-                    e = getElbowAngle(distance - 50, h);
+                for (float h = y; h >= y - 120; h -= 10) {
+                    b = getBaseAngle(distance - 20, h);
+                    e = getElbowAngle(distance - 20, h);
                     if (b < 0 || e < 0) continue;
                     setBaseServo(b);
                     setElbowServo(e);
                     delay(100);
                 }
-                for (float d = distance - 50; d <= distance + 90; d += 10) {
-                    b = getBaseAngle(d, y - 100);
-                    e = getElbowAngle(d, y - 100);
+                for (float d = distance - 20; d <= distance + 90; d += 10) {
+                    b = getBaseAngle(d, y - 120);
+                    e = getElbowAngle(d, y - 120);
                     if (b < 0 || e < 0) continue;
                     setBaseServo(b);
                     setElbowServo(e);
@@ -175,10 +189,90 @@ bool Claw::searchPet(int angle, int distance) {
                 }
                 closeGripper();
                 delay(1000);
+                setBaseServo(135);
+                setElbowServo(90);
+                delay(500);
+                setZAxisServo(90);
+                delay(500);
                 return true; 
             } 
-        }
+        // }
     } 
 
     return false; 
+}
+
+void Claw::dump() {
+    setBaseServo(110);
+    setElbowServo(120);
+    delay(500);
+    setZAxisServo(270);
+    delay(1000);
+    openGripper();
+    delay(1000);
+}
+
+void Claw::rampToss() {
+    float b = getBaseAngle(300, 80);
+    float e = getElbowAngle(300, 80);
+    setBaseServo(b);
+    delay(500);
+    setElbowServo(e);
+    delay(500);
+    setZAxisServo(160);
+    for (int d = 300; d <= 400; d += 10) {
+        b = getBaseAngle(d, 80);
+        e = getElbowAngle(d, 80);
+        setBaseServo(b);
+        setElbowServo(e);
+        if (b < 0 || e < 0) continue;
+        delay(100);
+    }
+    delay(500);
+    openGripper();
+    delay(500);
+    moveToIdlePos();
+    delay(1000);
+}
+
+// void Claw::wallToss() {
+//     setBaseServo(110);
+//     setElbowServo(120);
+//     delay(500);
+//     setZAxisServo(180);
+//     delay(1000);
+//     openGripper();
+//     delay(1000);
+// }
+
+void Claw::windowToss() {
+    float b = getBaseAngle(300, 100);
+    float e = getElbowAngle(300, 100);
+    setBaseServo(b);
+    delay(500);
+    setElbowServo(e);
+    delay(500);
+    setZAxisServo(150);
+    for (int d = 300; d <= 410; d += 10) {
+        b = getBaseAngle(d, 100);
+        e = getElbowAngle(d, 100);
+        setBaseServo(b);
+        setElbowServo(e);
+        if (b < 0 || e < 0) continue;
+        delay(100);
+    }
+    delay(500);
+    openGripper();
+    delay(1000);
+    for (int d = 410; d <= 300; d -= 10) {
+        b = getBaseAngle(d, 100);
+        e = getElbowAngle(d, 100);
+        setBaseServo(b);
+        setElbowServo(e);
+        if (b < 0 || e < 0) continue;
+        delay(100);
+    }
+    delay(500);
+    setZAxisServo(90);
+    delay(1000);
 }

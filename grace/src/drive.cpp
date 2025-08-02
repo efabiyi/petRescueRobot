@@ -4,9 +4,9 @@
 #include "utils.h"
 #include "pins.h"
 
-const int MIN_SPEED = 0;
+const int MIN_SPEED = 500;
 const int MAX_SPEED = 1600;
-const float KP = 0.6f;
+const float KP = 0.4f;
 const float KD = 0.0f;
 
 float lastError = 0.0;
@@ -129,3 +129,23 @@ void testDrive(int leftSpeed, int rightSpeed) {
   leftDrive(leftSpeed);
   rightDrive(rightSpeed);
 }
+
+// void searchForLine() {
+//   int l = 0;
+//   int r = 0;
+//   int direction = 1;
+//   unsigned long startSearch = millis();
+//   while (l < 100 && r < 100) {
+//     l = analogRead(LEFT_SENSOR);
+//     r = analogRead(RIGHT_SENSOR);
+
+//     if ((millis() - startSearch) >= 1000) {
+//       direction = -1 * direction;
+//       startSearch = millis();
+//     }
+
+//     leftDrive(1000 * direction);
+//     rightDrive(-1000 * direction);
+//     delay(10);
+//   }
+// }

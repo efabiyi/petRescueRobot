@@ -7,11 +7,16 @@
 
 #define COUNT 10
 
-const int IN_RANGE_DISTANCE = 350;
+const int IN_RANGE_DISTANCE = 300;
 const int REACHABLE_DISTANCE = 250;
-const int BASE_SPEED = 900;
+const int BASE_SPEED = 1100;
+const int SLOW_SPEED = 800;
+const int FAST_SPEED = 1200;
 const int THRESHOLD = 0;
-const int COOL_DOWN = 1000;
+const int COOL_DOWN = 3000;
+
+int inRange = REACHABLE_DISTANCE;
+int reachable = REACHABLE_DISTANCE;
 
 Scanner scanner;
 Claw claw;
@@ -20,6 +25,7 @@ PolarPoint pet;
 enum State {
   PRE_GATE,
   DRIVE, // line following and scanning until object is in range
+  APPROACH,
   VERIFY, // checking if object is a wall
   GET_PET, // searching for pet magnet
   RAMP,
@@ -30,7 +36,6 @@ enum State {
 State currentState = PRE_GATE;
 unsigned long lastSeenPetTime = 0;
 int petCount = 0;
-bool backedUp = false;
 unsigned long cutOffTime = 0;
 
 
@@ -43,12 +48,20 @@ void setup() {
   Serial.println("Scanner initialized");
   initializeDrive();
   claw.initialize();
-  delay(1000);
-  currentState = PRE_GATE;
-  petCount = 0;
+  // claw.closeGripper();
+  // PolarPoint p;
+  // p.distance = 200;
+  // p.angle = 30;
+  // scanner.setServoAngle(p.angle);
+  // delay(100);
+  // PolarPoint pp = calculateOffset(p);
+  // claw.setZAxisServo(pp.angle);
+  // delay(500);
   lastSeenPetTime = millis();
+  cutOffTime = millis() + 90000;
   pet.angle = -1;
   pet.distance = 9999;
+  delay(1000);
 }
 
 void resetAll() {
@@ -56,6 +69,7 @@ void resetAll() {
   claw.moveToIdlePos();
   pet.angle = -1;
   pet.distance = 9999;
+  delay(500);
 }
 
 void loop() {
@@ -66,67 +80,100 @@ void loop() {
   switch (currentState) {
     case PRE_GATE:
       scanner.setServoAngle(10);
-      lineFollow(BASE_SPEED, THRESHOLD);
+      lineFollow(FAST_SPEED, THRESHOLD);
       if ((scanner.readDistance() <= 200)) {
         currentState = DRIVE;
-        lastSeenPetTime = millis() - 500;
+        lastSeenPetTime = millis() - (COOL_DOWN - 500);
       }
       break;
     case DRIVE:
       lineFollow(BASE_SPEED, THRESHOLD);
-      if (scanner.scanOneStep(0)) {
+      if (scanner.scanOneStep(IN_RANGE_DISTANCE)) {
         if ((millis() - lastSeenPetTime) >= COOL_DOWN) {
           stopMotors();
           delay(500); // make sure wheels are stopped
-          currentState = VERIFY;
+          currentState = APPROACH;
         }
       }
       break;
+    case APPROACH:
+      while (true) {
+        pet = scanner.getClosestObject(0, 180);
+        if (pet.distance > IN_RANGE_DISTANCE) {
+          currentState = DRIVE;
+          break;
+        }
+        if ((1.0 * pet.distance * sin(radians(pet.angle))) < 101.6) {
+          currentState = VERIFY;
+          break;
+        }
+        unsigned long start = millis();
+        while ((millis() - start) <= 300) {
+          lineFollow(SLOW_SPEED, THRESHOLD);
+        }
+        stopMotors();
+        delay(500);
+      }
     case VERIFY: {
-      pet = scanner.getClosestObject();
+      // Serial.println("pet spotted at " + String(pet.angle) + " degrees at " + String(pet.distance) + " mm");
+      pet = scanner.honeIn(pet.angle);
       if (pet.distance > IN_RANGE_DISTANCE) {
         currentState = DRIVE;
         break;
       }
-      pet = scanner.honeIn(pet.angle);
-      if (pet.distance <= IN_RANGE_DISTANCE) {
-        scanner.setServoAngle(pet.angle);
-        stopMotors();
-        delay(1000);
-        currentState = GET_PET;
-      } else {
-        currentState = DRIVE;
+      if (pet.distance > REACHABLE_DISTANCE) {
+        currentState = APPROACH;
+        break;
       }
+      scanner.setServoAngle(pet.angle);
+      stopMotors();
+      delay(500);
+      scanner.setServoAngle(150);
+      currentState = GET_PET;
       break;
     }
     case GET_PET: {
       // Serial.println("pet found at " + String(pet.angle) + " degrees at " + String(pet.distance) + " mm");
       PolarPoint offsetPet = calculateOffset(pet); // pet coords relative to claw
-      if (claw.searchPet(offsetPet.angle, offsetPet.distance + 30)) {
-        claw.setElbowServo(100);
-        claw.setBaseServo(100);
-        delay(3000);
-        claw.openGripper();
-        delay(1000);
+      if (claw.searchPet(offsetPet.angle, offsetPet.distance + 30, petCount + 1)) {
         petCount++;
-        lastSeenPetTime = millis();
         if (petCount == 1) {
-          unsigned long startRamp = millis();
-          while ((millis() - startRamp) <= 7000) {
-            lineFollow(800, 100);
+          scanner.setServoAngle(10);
+          while (scanner.readDistance() > 300) {
+            lineFollow(SLOW_SPEED, THRESHOLD);
+            delay(10);
           }
-
-          resetAll();
+          unsigned long startRamp = millis();
+          while ((millis() - startRamp) <= 4000) {
+            lineFollow(BASE_SPEED, THRESHOLD);
+            delay(10);
+          }
+          stopMotors();
+          delay(500);
+          claw.rampToss();
           currentState = RAMP;
-          break;
+        } else if (petCount == 2) {
+          scanner.setServoAngle(150);
+          delay(1000);
+          claw.windowToss();
+          lastSeenPetTime = millis();
+          currentState = DRIVE;
+        } else {
+          scanner.setServoAngle(150);
+          delay(1000);
+          claw.dump();
+          lastSeenPetTime = millis();
+          currentState = DRIVE;
         }
+      } else {
+        currentState = DRIVE;
       }
+      if (petCount == 6) currentState = ESCAPE;
       resetAll();
-      currentState = DRIVE;
       break;
     }
     case RAMP:
-      scanner.setServoAngle(160);
+      scanner.setServoAngle(180);
       lineFollow(BASE_SPEED, THRESHOLD);
       if ((scanner.readDistance() <= 400)) {
         while (scanner.readDistance() <= 400) {
@@ -138,6 +185,8 @@ void loop() {
       }
       break;
     case ESCAPE:
+      stopMotors();
+      delay(100);
       break;
   }
 }
