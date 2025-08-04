@@ -5,14 +5,13 @@
 #include "constants.h"
 
 const int MIN_SPEED = 500;
-const int MAX_SPEED = 2000;
+const int MAX_SPEED = 1600;
 const float KP = 0.5f;
 const float KD = 0.0f;
 
 float lastError = 0.0;
 float lastOnLineError = 0.0;
 unsigned long lastTime = 0;
-unsigned long lastWriteTime = 0;
 
 void initializeDrive() {
   ledcSetup(FWD_LEFT_CHAN, 200, 12);
@@ -29,7 +28,6 @@ void initializeDrive() {
   pinMode(RIGHT_SENSOR, INPUT);
 
   lastTime = millis();
-  lastWriteTime = millis();
 }
 
 void leftDrive(int speed) {
@@ -79,7 +77,7 @@ void lineFollow(int baseSpeed, int threshold, Logger& logger) {
   debugPrint(" - Right: ");
   debugPrint(String(rightReading));
 
-  bool offLine = leftReading <= threshold && rightReading <= threshold;
+  bool offLine = (leftReading <= threshold) && (rightReading <= threshold);
 
   float error;
   float derivative;
@@ -103,7 +101,6 @@ void lineFollow(int baseSpeed, int threshold, Logger& logger) {
     debugPrint(String(derivative));
     debugPrint(" - Correction: ");
     debugPrint(String(correction));
-    
 
     lastOnLineError = error;
   } else {
@@ -118,21 +115,37 @@ void lineFollow(int baseSpeed, int threshold, Logger& logger) {
     debugPrint(String(correction));
   }
 
-  // if ((millis() - lastWriteTime) >= 50) {
-    leftSpeed = baseSpeed - (correction * baseSpeed/2);
-    rightSpeed = baseSpeed + (correction * baseSpeed/2);
-    leftDrive(leftSpeed);
-    rightDrive(rightSpeed);
-  //   lastWriteTime = millis();
-  // }
-
-  String reflectanceData = "[Drive] Drive Data: Off Line: " + String(offLine ? "Yes" : "No");
+  leftSpeed = baseSpeed - (correction * baseSpeed/2);
+  rightSpeed = baseSpeed + (correction * baseSpeed/2);
+  leftDrive(leftSpeed);
+  rightDrive(rightSpeed);
   
-  logger.log(reflectanceData);
-  delay(10);
+  debugPrintln("");
+  
+  lastError = error;
 }
 
 void testDrive(int leftSpeed, int rightSpeed) {
   leftDrive(leftSpeed);
   rightDrive(rightSpeed);
 }
+
+// void searchForLine() {
+//   int l = 0;
+//   int r = 0;
+//   int direction = 1;
+//   unsigned long startSearch = millis();
+//   while (l < 100 && r < 100) {
+//     l = analogRead(LEFT_SENSOR);
+//     r = analogRead(RIGHT_SENSOR);
+
+//     if ((millis() - startSearch) >= 1000) {
+//       direction = -1 * direction;
+//       startSearch = millis();
+//     }
+
+//     leftDrive(1000 * direction);
+//     rightDrive(-1000 * direction);
+//     delay(10);
+//   }
+// }

@@ -14,7 +14,10 @@ struct CartesianPoint {
 };
 
 int angleToDutyMG996R(int angle);
-int angleToDuty25kgcm(int angle);
+int angleToDutyScanner(int angle);
+int angleToDutyZ(int angle);
+int angleToDutyElbow(int angle);
+int angleToDutyBase(int angle);
 
 void debugPrint(const String &message);
 void debugPrintln(const String &message);

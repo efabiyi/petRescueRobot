@@ -4,54 +4,59 @@
 #include "utils.h"
 #include "logger.h"
 
-const int OFFSET = 85;
+const int OFFSET = 90;
 
 PolarPoint calculateOffset(PolarPoint scannerPoint);
 
 class Claw {
   private:
-    Logger& logger;
-    static constexpr int GRIPPER_OPEN_ANGLE = 0; 
-    static constexpr int GRIPPER_CLOSE_ANGLE = 110; 
+    static constexpr int GRIPPER_OPEN_ANGLE = 0;
+    static constexpr int GRIPPER_CLOSE_ANGLE = 100; 
 
     static constexpr int Z_MIN_ANGLE = 0; 
-    static constexpr int Z_MAX_ANGLE = 180; 
-    static constexpr int Z_STEP_ANGLE = 2; 
+    static constexpr int Z_MAX_ANGLE = 360;
     static constexpr int Z_IDLE_ANGLE = 90; 
 
-    static constexpr int ELBOW_MIN_ANGLE = 30; 
-    static constexpr int ELBOW_MAX_ANGLE = 110; 
-    static constexpr int ELBOW_STEP_SEARCH = 5; 
-    static constexpr int ELBOW_IDLE_ANGLE = 60; 
+    static constexpr int ELBOW_MIN_ANGLE = 0; 
+    static constexpr int ELBOW_MAX_ANGLE = 180; 
+    static constexpr int ELBOW_IDLE_ANGLE = 45; 
 
-    static constexpr int BASE_MIN_ANGLE = 40; 
-    static constexpr int BASE_MAX_ANGLE = 120; 
-    static constexpr int BASE_STEP_SEARCH = 5; 
-    static constexpr int BASE_IDLE_ANGLE = 110; 
+    static constexpr int BASE_MIN_ANGLE = 0; 
+    static constexpr int BASE_MAX_ANGLE = 180; 
+    static constexpr int BASE_IDLE_ANGLE = 135; 
 
     static constexpr int DABI = 127;
     static constexpr int XIAOBI = 330;
+    
+    static constexpr float HALL_VOLTAGE_REF = 3.3;
+    static constexpr float MAGNET_THRESHOLD_VOLTAGE = 1; 
 
     // current positions
-    int z;
-    int base;
-    int elbow;
-    int gripper;
+    int zAngle;
+    int baseAngle;
+    int elbowAngle;
+    int gripperAngle;
 
   public:
-    Claw(Logger& logger);
+    Claw();
     void initialize();
     void moveToIdlePos();
     void openGripper();
     void closeGripper();
+    void halfOpenGripper();
     void setZAxisServo(int angle);
     void setBaseServo(int angle);
     void setElbowServo(int angle);
     float distanceFromOrigin(float x, float y);
     float getElbowAngle(float x, float y);
     float getBaseAngle(float x, float y);
-    void searchForPet(int angle, int distance);
-    void grabPet(int angle, int distance);
+    float readVoltage();
+    bool searchPet(int angle, int distance, int petNumber);
+    bool searchPetLimitSwitch(int angle, int distance, int petNumber);
+    void dump();
+    void rampToss();
+    void wallToss();
+    void windowToss();
 };
 
 #endif 

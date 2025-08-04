@@ -2,23 +2,15 @@
 #define SCANNER_H
 
 #include <Adafruit_VL53L0X.h>
-#include <ESP32Servo.h>
-#include <limits.h>
-#include "constants.h"
-#include "logger.h"
-
-#include <Adafruit_VL53L0X.h>
 #include "utils.h"
 
 class Scanner {
 private:
-    Logger& logger;
-    static constexpr int SCAN_DATA_SIZE = 13;
+    static constexpr int SCAN_DATA_SIZE = 25;
     static constexpr int SERVO_STEP_SIZE = 10;
-    static constexpr int MAX_ANGLE = 150;
-    static constexpr int MIN_ANGLE = 30;
+    static constexpr int MAX_ANGLE = 170;
+    static constexpr int MIN_ANGLE = 10;
     static constexpr int MAX_DISTANCE = 9999;
-    static constexpr int IN_RANGE_DISTANCE = 300;
     
     Adafruit_VL53L0X lox;
     PolarPoint scanData[SCAN_DATA_SIZE];
@@ -30,17 +22,16 @@ public:
     void clearScanData();
     void setServoAngle(int angle);
 
-    Scanner(Logger& logger);
+    Scanner();
     bool initialize();
     void reset();
     int getServoAngle() { return servoAngle; }
-    PolarPoint getClosestObject();
-    void scanOneStep(int scanDelay);
+    PolarPoint getClosestObject(int minAngle = MIN_ANGLE, int maxAngle = MAX_ANGLE);
+    bool scanOneStep(int threshold,  int maxAngle = MAX_ANGLE, int minAngle = MIN_ANGLE);
     bool completedScan();
     void printScanData();
-    bool closestObjectIsWall();
+    bool isWall(PolarPoint data[], int size);
     PolarPoint honeIn(int angle);
 };
 
 #endif
-

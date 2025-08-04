@@ -21,8 +21,8 @@ void Logger::begin() {
 
 void Logger::loggingTask(void* pvParameters) {
   while (true) {
-    Serial.print("reached");
-    Serial.printf("LOG: Running loop() on core %d\n", xPortGetCoreID());
+    //Serial.print("reached");
+    //Serial.printf("LOG: Running loop() on core %d\n", xPortGetCoreID());
     String batch = "";
 
     // Drain all messages from the queue
@@ -51,7 +51,7 @@ void Logger::log(const String& message) {
 
 void Logger::send(const String& message) {
   if (WiFi.status() != WL_CONNECTED) {
-      Serial.println("WiFi not connected, can't send log.");
+      //Serial.println("WiFi not connected, can't send log.");
     return;
   }
 

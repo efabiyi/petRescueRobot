@@ -13,4 +13,5 @@ class Lift {
     void stop();
 };
 
+void IRAM_ATTR onSwitchPress();
 #endif

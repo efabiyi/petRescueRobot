@@ -13,8 +13,8 @@ constexpr int RIGHT_SENSOR = 37;
 
 constexpr int FWD_LEFT_PWM = 33;
 constexpr int BWD_LEFT_PWM = 32;
-constexpr int FWD_RIGHT_PWM = 13;
-constexpr int BWD_RIGHT_PWM = 14;
+constexpr int FWD_RIGHT_PWM = 14;
+constexpr int BWD_RIGHT_PWM = 13;
 
 constexpr int FWD_LEFT_CHAN = 0;
 constexpr int BWD_LEFT_CHAN = 1;
@@ -45,6 +45,10 @@ constexpr int FWD_LIFT_PIN = 26;
 constexpr int BWD_PWM = 8;
 constexpr int FWD_PWM = 9;
 
+// Limit Switches
+
+constexpr int CLAW_LIMIT_PIN = 35;
+constexpr int LIFT_LIMIT_PIN = 34;
 
 // CONSTANTS
 
