@@ -10,7 +10,8 @@ PolarPoint calculateOffset(PolarPoint scannerPoint);
 class Claw {
   private:
     static constexpr int GRIPPER_OPEN_ANGLE = 0;
-    static constexpr int GRIPPER_CLOSE_ANGLE = 100; 
+    static constexpr int GRIPPER_CLOSE_ANGLE = 110;
+    static constexpr int GRIPPER_HALF_ANGLE = 80;
 
     static constexpr int Z_MIN_ANGLE = 0; 
     static constexpr int Z_MAX_ANGLE = 360;
@@ -55,6 +56,7 @@ class Claw {
     void rampToss();
     void wallToss();
     void windowToss();
+    void grabPet(int angle, int distance, int petNumber);
 };
 
 #endif 

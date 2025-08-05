@@ -9,9 +9,11 @@ extern const float KD;
 void initializeDrive();
 void leftDrive(int speed);
 void rightDrive(int speed);
-void lineFollow(int baseSpeed, int threshold);
+void lineFollow(int baseSpeed, int threshold, float KP);
+void lineFollowBackwards(int baseSpeed, int threshold);
 void testDrive(int leftSpeed, int rightSpeed);
 void stopMotors();
 void searchForLine();
+void uTurn(int threshold);
 
 #endif

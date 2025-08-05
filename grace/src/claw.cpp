@@ -43,7 +43,7 @@ void Claw::closeGripper() {
 }
 
 void Claw::halfOpenGripper() {
-    gripperAngle = 70;
+    gripperAngle = GRIPPER_HALF_ANGLE;
     ledcWrite(GRIPPER_SERVO_CHANNEL, angleToDutyMG996R(gripperAngle));
 }
 
@@ -125,7 +125,7 @@ bool Claw::searchPet(int angle, int distance, int petNumber) {
     Serial.println("claw searching at " + String(angle) + " degrees");
     int step = -1;
     int zDeg = angle;
-    int startY = 120;
+    int startY = 100;
     int zRange = 8;
     if (petNumber == 3 || petNumber == 4) {
         setBaseServo(110);
@@ -171,17 +171,17 @@ bool Claw::searchPet(int angle, int distance, int petNumber) {
                 delay(500);
                 setZAxisServo(zDeg);
                 delay(500);
-                for (float h = y; h >= y - 120; h -= 10) {
-                    b = getBaseAngle(distance - 20, h);
-                    e = getElbowAngle(distance - 20, h);
+                for (float h = y; h >= y - 150; h -= 10) {
+                    b = getBaseAngle(distance, h);
+                    e = getElbowAngle(distance, h);
                     if (b < 0 || e < 0) continue;
                     setBaseServo(b);
                     setElbowServo(e);
                     delay(100);
                 }
-                for (float d = distance - 20; d <= distance + 90; d += 10) {
-                    b = getBaseAngle(d, y - 120);
-                    e = getElbowAngle(d, y - 120);
+                for (float d = distance; d <= distance + 50; d += 10) {
+                    b = getBaseAngle(d, y - 150);
+                    e = getElbowAngle(d, y - 150);
                     if (b < 0 || e < 0) continue;
                     setBaseServo(b);
                     setElbowServo(e);
@@ -202,37 +202,71 @@ bool Claw::searchPet(int angle, int distance, int petNumber) {
     return false; 
 }
 
+void Claw::grabPet(int angle, int distance, int petNumber) { 
+    int h = -120;
+    int r = 30;
+    if (petNumber == 3 || petNumber == 4) {
+        setBaseServo(110);
+        setElbowServo(150);
+        delay(500);
+        h = 60;
+        r = 80;
+    } else {
+        setBaseServo(120);
+        setElbowServo(45);
+        delay(500);
+    }
+    setZAxisServo(angle);
+    openGripper();
+    if (petNumber == 4) halfOpenGripper();
+    delay(500);
+    for (float d = distance - r; d <= distance + r; d += 10) {
+        float b = getBaseAngle(d, h);
+        float e = getElbowAngle(d, h);
+        if (b < 0 || e < 0) continue;
+        setBaseServo(b);
+        setElbowServo(e);
+        delay(100);
+    }
+    closeGripper();
+    delay(1000);
+    setBaseServo(135);
+    setElbowServo(90);
+    delay(500);
+    setZAxisServo(90);
+    delay(500);
+}
+
 void Claw::dump() {
     setBaseServo(110);
     setElbowServo(120);
     delay(500);
     setZAxisServo(270);
-    delay(1000);
+    delay(500);
     openGripper();
-    delay(1000);
+    delay(500);
 }
 
 void Claw::rampToss() {
     float b = getBaseAngle(300, 80);
     float e = getElbowAngle(300, 80);
     setBaseServo(b);
-    delay(500);
     setElbowServo(e);
     delay(500);
-    setZAxisServo(160);
+    setZAxisServo(170);
     for (int d = 300; d <= 400; d += 10) {
         b = getBaseAngle(d, 80);
         e = getElbowAngle(d, 80);
         setBaseServo(b);
         setElbowServo(e);
         if (b < 0 || e < 0) continue;
-        delay(100);
+        delay(50);
     }
     delay(500);
     openGripper();
     delay(500);
     moveToIdlePos();
-    delay(1000);
+    delay(500);
 }
 
 // void Claw::wallToss() {
@@ -246,31 +280,31 @@ void Claw::rampToss() {
 // }
 
 void Claw::windowToss() {
-    float b = getBaseAngle(300, 100);
-    float e = getElbowAngle(300, 100);
+    float b = getBaseAngle(250, 40);
+    float e = getElbowAngle(250, 40);
     setBaseServo(b);
-    delay(500);
     setElbowServo(e);
     delay(500);
-    setZAxisServo(150);
-    for (int d = 300; d <= 410; d += 10) {
-        b = getBaseAngle(d, 100);
-        e = getElbowAngle(d, 100);
+    setZAxisServo(170);
+    for (int d = 250; d <= 400; d += 10) {
+        b = getBaseAngle(d, 40);
+        e = getElbowAngle(d, 40);
         setBaseServo(b);
         setElbowServo(e);
         if (b < 0 || e < 0) continue;
-        delay(100);
+        delay(50);
     }
     delay(500);
     openGripper();
     delay(1000);
-    for (int d = 410; d <= 300; d -= 10) {
-        b = getBaseAngle(d, 100);
-        e = getElbowAngle(d, 100);
+    closeGripper();
+    for (int d = 400; d >= 250; d -= 10) {
+        b = getBaseAngle(d, 70);
+        e = getElbowAngle(d, 70);
         setBaseServo(b);
         setElbowServo(e);
         if (b < 0 || e < 0) continue;
-        delay(100);
+        delay(50);
     }
     delay(500);
     setZAxisServo(90);

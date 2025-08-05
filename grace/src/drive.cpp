@@ -6,8 +6,6 @@
 
 const int MIN_SPEED = 500;
 const int MAX_SPEED = 1600;
-const float KP = 0.4f;
-const float KD = 0.0f;
 
 float lastError = 0.0;
 float lastOnLineError = 0.0;
@@ -69,7 +67,7 @@ void stopMotors() {
   ledcWrite(BWD_RIGHT_CHAN, 0);  
 }
 
-void lineFollow(int baseSpeed, int threshold) {
+void lineFollow(int baseSpeed, int threshold, float KP) {
   int leftReading = analogRead(LEFT_SENSOR);
   int rightReading = analogRead(RIGHT_SENSOR);
   debugPrint("Left: ");
@@ -80,7 +78,6 @@ void lineFollow(int baseSpeed, int threshold) {
   bool offLine = (leftReading <= threshold) && (rightReading <= threshold);
 
   float error;
-  float derivative;
   float correction;
   int leftSpeed;
   int rightSpeed;
@@ -91,14 +88,64 @@ void lineFollow(int baseSpeed, int threshold) {
     lastTime = now;
 
     error = (leftReading - rightReading) / (leftReading + rightReading + 0.001);
-    derivative = (error - lastError) / deltaTime;
-    correction = (KP * error) + (KD * derivative);
+    correction = (KP * error);
 
     debugPrint(" - ONLINE");
     debugPrint(" - Error: ");
     debugPrint(String(error));
-    debugPrint(" - Derivative: ");
-    debugPrint(String(derivative));
+    debugPrint(" - Correction: ");
+    debugPrint(String(correction));
+
+    lastOnLineError = error;
+  } else {
+    error = 20 * lastOnLineError;
+    correction = KP * error;
+
+    debugPrint(" - OFFLINE");
+    debugPrint(" - Error: ");
+    debugPrint(String(error));
+    debugPrint(" - Derivative: N/A");
+    debugPrint(" - Correction: ");
+    debugPrint(String(correction));
+  }
+
+  leftSpeed = baseSpeed - (correction * baseSpeed/2);
+  rightSpeed = baseSpeed + (correction * baseSpeed/2);
+  leftDrive(leftSpeed);
+  rightDrive(rightSpeed);
+  
+  debugPrintln("");
+  
+  lastError = error;
+}
+
+void lineFollowBackwards(int baseSpeed, int threshold) {
+  baseSpeed = -1 * baseSpeed;
+  int leftReading = analogRead(LEFT_SENSOR);
+  int rightReading = analogRead(RIGHT_SENSOR);
+  debugPrint("Left: ");
+  debugPrint(String(leftReading));
+  debugPrint(" - Right: ");
+  debugPrint(String(rightReading));
+
+  bool offLine = (leftReading <= threshold) && (rightReading <= threshold);
+
+  float error;
+  float correction;
+  int leftSpeed;
+  int rightSpeed;
+
+  if (!offLine) {
+    unsigned long now = millis();
+    float deltaTime = (now - lastTime) / 1000.0;
+    lastTime = now;
+
+    error = -1 * (leftReading - rightReading) / (leftReading + rightReading + 0.001);
+    correction = (KP * error);
+
+    debugPrint(" - ONLINE");
+    debugPrint(" - Error: ");
+    debugPrint(String(error));
     debugPrint(" - Correction: ");
     debugPrint(String(correction));
 
@@ -149,3 +196,23 @@ void testDrive(int leftSpeed, int rightSpeed) {
 //     delay(10);
 //   }
 // }
+
+void uTurn(int threshold) {
+  unsigned long start = millis();
+  while ((millis() - start) <= 5000) {
+    testDrive(1000, 4000);
+    delay(200);
+    testDrive(-4000, -1000);
+    delay(200);
+  }
+  int l = analogRead(LEFT_SENSOR);
+  int r = analogRead(RIGHT_SENSOR);
+  while (l < threshold && r < threshold) {
+    testDrive(0, 4000);
+    delay(500);
+    testDrive(-4000, 0);
+    delay(500);
+  }
+  stopMotors();
+  delay(1000);
+}

@@ -63,8 +63,8 @@ bool Scanner::scanOneStep(int threshold) {
 }
 
 PolarPoint Scanner::honeIn(int angle) {
-    int minAngle = max(angle - 5, MIN_ANGLE);
-    int maxAngle = min(angle + 5, MAX_ANGLE);
+    int minAngle = max(angle - 3, MIN_ANGLE);
+    int maxAngle = min(angle + 3, MAX_ANGLE);
     PolarPoint obj;
     obj.angle = -1;
     obj.distance = MAX_DISTANCE;
@@ -101,7 +101,7 @@ PolarPoint Scanner::getClosestObject(int minAngle, int maxAngle) {
     closestObject.distance = MAX_DISTANCE;
     closestObject.angle = -1;
     setServoAngle(minAngle);
-    delay(1000);
+    delay(500);
     for (int i = minAngle; i <= maxAngle; i += 10) {
         setServoAngle(i);
         delay(100);
