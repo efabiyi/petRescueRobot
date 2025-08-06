@@ -67,7 +67,7 @@ void stopMotors() {
   ledcWrite(BWD_RIGHT_CHAN, 0);  
 }
 
-void lineFollow(int baseSpeed, int threshold, float KP) {
+void lineFollow(int baseSpeed, int threshold, float KP, Logger& logger) {
   int leftReading = analogRead(LEFT_SENSOR);
   int rightReading = analogRead(RIGHT_SENSOR);
   debugPrint("Left: ");
@@ -115,6 +115,9 @@ void lineFollow(int baseSpeed, int threshold, float KP) {
   rightDrive(rightSpeed);
   
   debugPrintln("");
+  String reflectanceData = "[Drive] Drive Data: Off Line? :  " + String(offLine ? " OFFLINE " : " ONLINE ");
+  String driveData = "Left: "+String(leftReading)+" - Right: " + String(rightReading) + " Error: "+ String(error) + " - Correction: "+String(correction);
+  logger.log(reflectanceData +" | "+ driveData);
   
   lastError = error;
 }
