@@ -111,7 +111,6 @@ PolarPoint Scanner::getClosestObject(int minAngle, int maxAngle) {
             closestObject.angle = i;
         }
     }
-
     return closestObject;
 }
 

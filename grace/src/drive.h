@@ -10,10 +10,10 @@ void initializeDrive();
 void leftDrive(int speed);
 void rightDrive(int speed);
 void lineFollow(int baseSpeed, int threshold, float KP);
-void lineFollowBackwards(int baseSpeed, int threshold);
-void testDrive(int leftSpeed, int rightSpeed);
+void drive(int leftSpeed, int rightSpeed);
 void stopMotors();
-void searchForLine();
-void uTurn(int threshold);
+void uTurnRight(int threshold);
+void uTurnLeft(int threshold);
+void searchLine(int threshold);
 
 #endif

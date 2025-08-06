@@ -4,7 +4,7 @@
 #include "utils.h"
 #include "pins.h"
 
-const int MIN_SPEED = 500;
+const int MIN_SPEED = 0;
 const int MAX_SPEED = 1600;
 
 float lastError = 0.0;
@@ -119,60 +119,7 @@ void lineFollow(int baseSpeed, int threshold, float KP) {
   lastError = error;
 }
 
-void lineFollowBackwards(int baseSpeed, int threshold) {
-  baseSpeed = -1 * baseSpeed;
-  int leftReading = analogRead(LEFT_SENSOR);
-  int rightReading = analogRead(RIGHT_SENSOR);
-  debugPrint("Left: ");
-  debugPrint(String(leftReading));
-  debugPrint(" - Right: ");
-  debugPrint(String(rightReading));
-
-  bool offLine = (leftReading <= threshold) && (rightReading <= threshold);
-
-  float error;
-  float correction;
-  int leftSpeed;
-  int rightSpeed;
-
-  if (!offLine) {
-    unsigned long now = millis();
-    float deltaTime = (now - lastTime) / 1000.0;
-    lastTime = now;
-
-    error = -1 * (leftReading - rightReading) / (leftReading + rightReading + 0.001);
-    correction = (KP * error);
-
-    debugPrint(" - ONLINE");
-    debugPrint(" - Error: ");
-    debugPrint(String(error));
-    debugPrint(" - Correction: ");
-    debugPrint(String(correction));
-
-    lastOnLineError = error;
-  } else {
-    error = 20 * lastOnLineError;
-    correction = KP * error;
-
-    debugPrint(" - OFFLINE");
-    debugPrint(" - Error: ");
-    debugPrint(String(error));
-    debugPrint(" - Derivative: N/A");
-    debugPrint(" - Correction: ");
-    debugPrint(String(correction));
-  }
-
-  leftSpeed = baseSpeed - (correction * baseSpeed/2);
-  rightSpeed = baseSpeed + (correction * baseSpeed/2);
-  leftDrive(leftSpeed);
-  rightDrive(rightSpeed);
-  
-  debugPrintln("");
-  
-  lastError = error;
-}
-
-void testDrive(int leftSpeed, int rightSpeed) {
+void drive(int leftSpeed, int rightSpeed) {
   leftDrive(leftSpeed);
   rightDrive(rightSpeed);
 }
@@ -197,21 +144,44 @@ void testDrive(int leftSpeed, int rightSpeed) {
 //   }
 // }
 
-void uTurn(int threshold) {
-  unsigned long start = millis();
-  while ((millis() - start) <= 5000) {
-    testDrive(1000, 4000);
-    delay(200);
-    testDrive(-4000, -1000);
-    delay(200);
-  }
+void uTurnRight(int threshold) {
+  drive(1000, -1000);
+  delay(500);
   int l = analogRead(LEFT_SENSOR);
   int r = analogRead(RIGHT_SENSOR);
   while (l < threshold && r < threshold) {
-    testDrive(0, 4000);
-    delay(500);
-    testDrive(-4000, 0);
-    delay(500);
+    drive(1000, -1000);
+    l = analogRead(LEFT_SENSOR);
+    r = analogRead(RIGHT_SENSOR);
+  }
+  stopMotors();
+  delay(1000);
+}
+
+void uTurnLeft(int threshold) {
+  drive(-1000, 1000);
+  delay(500);
+  int l = analogRead(LEFT_SENSOR);
+  int r = analogRead(RIGHT_SENSOR);
+  while (l < threshold && r < threshold) {
+    drive(-1000, 1000);
+    l = analogRead(LEFT_SENSOR);
+    r = analogRead(RIGHT_SENSOR);
+  }
+  stopMotors();
+  delay(1000);
+}
+
+void searchLine(int threshold) {
+  int l = analogRead(LEFT_SENSOR);
+  int r = analogRead(RIGHT_SENSOR);
+  while (l < threshold && r < threshold) {
+    drive(1000, -1000);
+    delay(1000);
+    drive(-1000, 1000);
+    delay(1000);
+    l = analogRead(LEFT_SENSOR);
+    r = analogRead(RIGHT_SENSOR);
   }
   stopMotors();
   delay(1000);

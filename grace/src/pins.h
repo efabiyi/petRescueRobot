@@ -29,4 +29,11 @@ constexpr int BASE_SERVO_CHANNEL = 7;
 constexpr int ELBOW_SERVO_CHANNEL = 8;
 constexpr int GRIPPER_SERVO_CHANNEL = 9;
 
+// Lift pins
+constexpr int LIFT_BWD_PIN = 25;
+constexpr int LIFT_FWD_PIN = 26;
+constexpr int LIFT_BWD_PWM = 8;
+constexpr int LIFT_FWD_PWM = 9;
+constexpr int LIFT_LIMIT_PIN = 34;
+
 #endif

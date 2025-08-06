@@ -14,7 +14,7 @@ class Claw {
     static constexpr int GRIPPER_HALF_ANGLE = 80;
 
     static constexpr int Z_MIN_ANGLE = 0; 
-    static constexpr int Z_MAX_ANGLE = 360;
+    static constexpr int Z_MAX_ANGLE = 300;
     static constexpr int Z_IDLE_ANGLE = 90; 
 
     static constexpr int ELBOW_MIN_ANGLE = 0; 
