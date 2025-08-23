@@ -9,7 +9,7 @@ int angleToDutyMG996R(int angle) {
 
 int angleToDutyScanner(int angle) {
     angle = constrain(angle, 0, 180);
-    int pulseWidth = map(angle, 0, 180, 480, 2500);
+    int pulseWidth = map(angle, 0, 180, 480, 2470);
     return (int) (pulseWidth * 4095) / 20000;
 }
 

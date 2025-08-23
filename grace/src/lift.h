@@ -11,8 +11,8 @@ class Lift {
   public:
     Lift();
     void setSpeed(int newSpeed);
-    void raise(int timeMs);
-    void lower(int timeMs);
+    void raise();
+    void lower();
     void stop();
 };
 

@@ -15,16 +15,14 @@ void Lift::setSpeed(int newSpeed) {
   speed = constrain(newSpeed, MIN_LIFT_SPEED, MAX_LIFT_SPEED);
 }
 
-void Lift::raise(int timeMs) {
+void Lift::raise() {
   ledcWrite(LIFT_FWD_PWM, speed);
   ledcWrite(LIFT_BWD_PWM, 0);
 }
 
-void Lift::lower(int timeMs) {
+void Lift::lower() {
   ledcWrite(LIFT_BWD_PWM, speed);
   ledcWrite(LIFT_FWD_PWM, 0);
-  delay(timeMs);
-  stop();
 }
 
 void Lift::stop() {

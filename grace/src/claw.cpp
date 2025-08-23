@@ -167,7 +167,7 @@ bool Claw::searchPet(int angle, int distance, int petNumber) {
                 setBaseServo(b);
                 delay(500);
                 openGripper();
-                if (petNumber == 4) halfOpenGripper();
+                // if (petNumber == 4) halfOpenGripper();
                 delay(500);
                 setZAxisServo(zDeg);
                 delay(500);
@@ -190,8 +190,8 @@ bool Claw::searchPet(int angle, int distance, int petNumber) {
                 closeGripper();
                 delay(1000);
                 setBaseServo(135);
-                setElbowServo(90);
                 delay(500);
+                setElbowServo(90);
                 setZAxisServo(90);
                 delay(500);
                 return true; 
@@ -203,21 +203,26 @@ bool Claw::searchPet(int angle, int distance, int petNumber) {
 }
 
 void Claw::grabPet(int angle, int distance, int petNumber) { 
-    int h = -120;
+    int h = -150;
     int r = 30;
     int dlay = 50;
     if (petNumber == 6) {
-        distance += 30;
+        // distance += 30;
+        distance -= 50;
         dlay = 200;
         r = 60;
-        h = -150;
-    }
-    if (petNumber == 3 || petNumber == 4) {
+        // h = -150;
+    } else if (petNumber == 7) {
+        distance += 30;
+        h = -90;
+        angle = 170;
+    } else if (petNumber == 3 || petNumber == 4) {
         setBaseServo(110);
         setElbowServo(150);
         delay(100);
         h = 60;
-        r = 60;
+        // if (petNumber == 4) angle -= 7;
+        r = 100;
     } else {
         setBaseServo(120);
         setElbowServo(45);
@@ -225,7 +230,7 @@ void Claw::grabPet(int angle, int distance, int petNumber) {
     }
     setZAxisServo(angle);
     openGripper();
-    // if (petNumber == 4) halfOpenGripper();
+    if (petNumber == 4) halfOpenGripper();
     for (float d = distance - r; d <= distance + r; d += 10) {
         float b = getBaseAngle(d, h);
         float e = getElbowAngle(d, h);
@@ -234,11 +239,26 @@ void Claw::grabPet(int angle, int distance, int petNumber) {
         setElbowServo(e);
         delay(dlay);
     }
+    delay(500);
     closeGripper();
     delay(500);
-    setBaseServo(getBaseAngle(distance + r, h + 50));
-    setElbowServo(getElbowAngle(distance + r, h + 50));
+    if (petNumber == 4) {
+        for (float i = h; i <= h + 100; i += 10) {
+            float b = getBaseAngle(distance + r, h);
+            float e = getElbowAngle(distance + r, h);
+            if (b < 0 || e < 0) continue;
+            setBaseServo(b);
+            setElbowServo(e);
+            delay(dlay);
+        }
+    }
+    if (petNumber >= 5) {
+        setBaseServo(getBaseAngle(distance, h + 100));
+        setElbowServo(getElbowAngle(distance, h + 100));
+        delay(500);
+    }
     setBaseServo(135);
+    if (petNumber >= 5) delay(500);
     setElbowServo(60);
     setZAxisServo(90);
 }
@@ -247,9 +267,21 @@ void Claw::dump() {
     setBaseServo(110);
     setElbowServo(120);
     delay(200);
-    setZAxisServo(290);
+    setZAxisServo(300);
     delay(100);
-    setElbowServo(105);
+    setElbowServo(100);
+    openGripper();
+    delay(500);
+    setElbowServo(120);
+}
+
+void Claw::dunk() {
+    setBaseServo(100);
+    for (int i = 120; i <= 200; i += 10) {
+        setElbowServo(i);
+        delay(10);
+    }
+    delay(1000);
     openGripper();
     delay(500);
 }

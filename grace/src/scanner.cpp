@@ -33,6 +33,7 @@ int Scanner::readDistance() {
 
     if (measure.RangeStatus != 4) {  // phase failures have incorrect data
         return measure.RangeMilliMeter + 22;
+        // return measure.RangeMilliMeter - 30;
     } else {
         return MAX_DISTANCE;
     }

@@ -11,14 +11,14 @@ class Claw {
   private:
     static constexpr int GRIPPER_OPEN_ANGLE = 0;
     static constexpr int GRIPPER_CLOSE_ANGLE = 110;
-    static constexpr int GRIPPER_HALF_ANGLE = 80;
+    static constexpr int GRIPPER_HALF_ANGLE = 60;
 
     static constexpr int Z_MIN_ANGLE = 0; 
     static constexpr int Z_MAX_ANGLE = 300;
     static constexpr int Z_IDLE_ANGLE = 90; 
 
     static constexpr int ELBOW_MIN_ANGLE = 0; 
-    static constexpr int ELBOW_MAX_ANGLE = 180; 
+    static constexpr int ELBOW_MAX_ANGLE = 270; 
     static constexpr int ELBOW_IDLE_ANGLE = 45; 
 
     static constexpr int BASE_MIN_ANGLE = 0; 
@@ -53,6 +53,7 @@ class Claw {
     float readVoltage();
     bool searchPet(int angle, int distance, int petNumber);
     void dump();
+    void dunk();
     void rampToss();
     void wallToss();
     void windowToss();
