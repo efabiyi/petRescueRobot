@@ -21,7 +21,7 @@ async function fetchLogs() {
     const message = match[2].replace(/\s*\|\s*/g, '\n');
 
     // Check for special messages
-    if (sensor === "state") {
+    if (sensor === "state") { 
       document.getElementById("robotState").textContent = message;
       return;
     }

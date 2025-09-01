@@ -27,7 +27,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Rate limiting middleware
 let lastSentTime = 0;
-const RATE_LIMIT_MS = 500;
+const RATE_LIMIT_MS = 0;
 
 // POST endpoint for ESP32 to send logs
 app.post('/log', (req, res) => {

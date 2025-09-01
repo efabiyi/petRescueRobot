@@ -8,7 +8,7 @@ Scanner::Scanner() {
     servoAngle = 90;
 }
 
-bool Scanner:: initialize() {
+bool Scanner::initialize() {
     ledcSetup(SERVO_CHANNEL, 50, 12);
     ledcAttachPin(SERVO_PIN, SERVO_CHANNEL);
     Serial.println("Initializing VL53L0X sensor");
@@ -33,6 +33,7 @@ int Scanner::readDistance() {
 
     if (measure.RangeStatus != 4) {  // phase failures have incorrect data
         return measure.RangeMilliMeter + 22;
+        // return measure.RangeMilliMeter - 30;
     } else {
         return MAX_DISTANCE;
     }
@@ -52,22 +53,19 @@ int Scanner::readDistance() {
 //     scanData[index].angle = servoAngle;
 // }
 
-bool Scanner::scanOneStep(int threshold, int maxAngle, int minAngle) {
-    if (servoAngle >= maxAngle || servoAngle <= minAngle) {
+bool Scanner::scanOneStep(int threshold) {
+    if (servoAngle >= MAX_ANGLE || servoAngle <= MIN_ANGLE) {
         servoStep = -1 * servoStep;
     }
     servoAngle = servoAngle + servoStep;
     setServoAngle(servoAngle);
-    Serial.println("Servo Angle:"+ servoAngle);
     int distance = readDistance();
-    
-    Serial.println("Distance:"+ distance);
     return (distance <= threshold);
 }
 
 PolarPoint Scanner::honeIn(int angle) {
-    int minAngle = max(angle - 5, MIN_ANGLE);
-    int maxAngle = min(angle + 5, MAX_ANGLE);
+    int minAngle = max(angle - 3, MIN_ANGLE);
+    int maxAngle = min(angle + 3, MAX_ANGLE);
     PolarPoint obj;
     obj.angle = -1;
     obj.distance = MAX_DISTANCE;
@@ -104,7 +102,7 @@ PolarPoint Scanner::getClosestObject(int minAngle, int maxAngle) {
     closestObject.distance = MAX_DISTANCE;
     closestObject.angle = -1;
     setServoAngle(minAngle);
-    delay(1000);
+    delay(500);
     for (int i = minAngle; i <= maxAngle; i += 10) {
         setServoAngle(i);
         delay(100);
@@ -114,7 +112,6 @@ PolarPoint Scanner::getClosestObject(int minAngle, int maxAngle) {
             closestObject.angle = i;
         }
     }
-
     return closestObject;
 }
 

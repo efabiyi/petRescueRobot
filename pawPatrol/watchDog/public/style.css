@@ -1,7 +1,7 @@
 /* General Layout */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #0d1b2a;
+  background-color: #1A1A1D;
   color: #e0f7fa;
   margin: 0;
   padding: 0;
@@ -11,7 +11,7 @@ body {
 }
 
 header {
-  background-color: #1b263b;
+  background-color: #210F37;
   padding: 1em 2em;
   text-align: center;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
@@ -26,7 +26,7 @@ header h1 {
 header p {
   margin: 0.5em 0 0;
   font-style: italic;
-  color: #a9d6e5;
+  color: #f4d35e;
 }
 
 /* Dashboard Layout */
@@ -41,10 +41,10 @@ header p {
   display: flex;
   justify-content: center;  /* Center the content horizontally */
   align-items: center;
-  background-color: #133150;
+  background-color: #210F37;
   padding: 1em 2em;
   border-bottom: 2px solid #f4d35e;
-  color: #ffffff;
+  color: #f4d35e;
 }
 
 .status-item {
@@ -60,7 +60,7 @@ header p {
 
 .status-item span {
   margin-left: 0.5em;
-  color: #a9d6e5;
+  color: #f4d35e;
 }
 
 /* Sensor Grid */
@@ -72,7 +72,7 @@ header p {
 }
 
 .sensor-card {
-  background-color: #1e3a5f;
+  background-color: #2E0249;
   padding: 1.5em;
   border-radius: 1em;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
@@ -85,8 +85,8 @@ header p {
 
 /* Log Boxes */
 .log-box {
-  background-color: #0f1c2e;
-  color: #00ff99;
+  background-color: #1A1A1D;
+  color: #f4d35e;
   padding: 1em;
   border-radius: 0.5em;
   height: 400px;
@@ -99,7 +99,7 @@ header p {
 
 /* Footer */
 footer {
-  background-color: #1b263b;
+  background-color: #210F37;
   text-align: center;
   padding: 0.7 em;
   color: #a9d6e5;

@@ -27,7 +27,7 @@ public:
     void reset();
     int getServoAngle() { return servoAngle; }
     PolarPoint getClosestObject(int minAngle = MIN_ANGLE, int maxAngle = MAX_ANGLE);
-    bool scanOneStep(int threshold,  int maxAngle = MAX_ANGLE, int minAngle = MIN_ANGLE);
+    bool scanOneStep(int threshold);
     bool completedScan();
     void printScanData();
     bool isWall(PolarPoint data[], int size);

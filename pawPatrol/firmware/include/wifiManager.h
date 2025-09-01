@@ -8,4 +8,5 @@ class WifiManager {
     public:
     WifiManager();
     void startWifi(); 
+    bool isConnected();
 };

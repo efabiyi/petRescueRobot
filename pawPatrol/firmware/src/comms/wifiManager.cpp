@@ -28,3 +28,7 @@ void  WifiManager::startWifi() {
   Serial.println("\nWiFi connected!");
 
 }
+
+bool WifiManager::isConnected(){
+  return WiFi.status() == WL_CONNECTED;
+}

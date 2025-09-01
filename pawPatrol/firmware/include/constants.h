@@ -40,8 +40,8 @@ constexpr int GRIPPER_SERVO_CHANNEL = 9;
 constexpr int HALL_PIN = 36;
 
 //Lift Pins
-constexpr int BWD_LIFT_PIN = 25;
-constexpr int FWD_LIFT_PIN = 26;
+constexpr int BWD_LIFT_PIN = 26;
+constexpr int FWD_LIFT_PIN = 25;
 constexpr int BWD_PWM = 8;
 constexpr int FWD_PWM = 9;
 
